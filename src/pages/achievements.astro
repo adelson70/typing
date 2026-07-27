@@ -1,0 +1,61 @@
+---
+/**
+ * Achievement showcase.
+ *
+ * A landing page for the progression system: it is both a retention surface for
+ * returning players and an indexable page describing what the product rewards.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import RelatedLinks from '@/components/content/RelatedLinks.astro';
+import { AchievementGrid } from '@/features/progression/components/AchievementGrid';
+
+import { breadcrumbSchema } from '@/seo/jsonld';
+import { t } from '@/i18n/translations';
+import { LANDING_PAGES } from '@/data/pages';
+import type { BreadcrumbItem } from '@/types/seo';
+
+const locale = 'en' as const;
+
+const title = 'Typing Achievements — Track Every Milestone';
+const description =
+  'Earn XP, climb levels and unlock achievements as you practise. All progress is stored on your own device.';
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'xp.achievements') },
+];
+
+const related = LANDING_PAGES.filter((page) =>
+  ['daily-challenge', 'typing-test', 'typing-test-5-minutes'].includes(page.key),
+).map((page) => ({
+  title: page.content[locale].h1,
+  description: page.content[locale].description,
+  routeKey: page.key,
+}));
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey="achievements"
+  locale={locale}
+  keywords={['typing achievements', 'typing xp', 'typing levels', 'typing streak']}
+  schemas={[breadcrumbSchema(breadcrumbs)]}
+  availableLocales={['en']}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold">{t(locale, 'xp.achievements')}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{description}</p>
+  </header>
+
+  {/* client:only — reads local progress, so there is no meaningful
+      server-rendered form to hydrate. */}
+  <div class="mt-10">
+    <AchievementGrid client:only="react" locale={locale} />
+  </div>
+
+  <RelatedLinks heading={t(locale, 'common.relatedPages')} links={related} locale={locale} />
+</BaseLayout>

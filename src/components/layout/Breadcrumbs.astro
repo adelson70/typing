@@ -1,0 +1,54 @@
+---
+/**
+ * Visible breadcrumb trail. The matching JSON-LD is emitted by the page via
+ * `breadcrumbSchema()` — the two are built from the same array, so the visible
+ * trail and the structured data can never disagree.
+ */
+import { localizedPath, type Locale } from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+import type { BreadcrumbItem } from '@/types/seo';
+
+interface Props {
+  items: readonly BreadcrumbItem[];
+  locale: Locale;
+}
+
+const { items, locale } = Astro.props;
+---
+
+<nav aria-label={t(locale, 'a11y.breadcrumb')} class="mb-6">
+  <ol class="flex flex-wrap items-center gap-1.5 text-sm text-fg-muted">
+    {
+      items.map((item, index) => (
+        <li class="flex items-center gap-1.5">
+          {index > 0 && (
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              class="text-fg-subtle"
+              aria-hidden="true"
+            >
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          )}
+          {item.path ? (
+            <a
+              href={localizedPath(locale, item.path)}
+              class="rounded-xs transition-colors hover:text-fg"
+            >
+              {item.name}
+            </a>
+          ) : (
+            <span class="font-medium text-fg" aria-current="page">
+              {item.name}
+            </span>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>

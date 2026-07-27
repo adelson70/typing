@@ -1,0 +1,61 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import HomeContent from '@/components/home/HomeContent.astro';
+import { faqSchema, webApplicationSchema } from '@/seo/jsonld';
+import type { FaqItem } from '@/types/seo';
+
+const locale = 'en' as const;
+
+const title = 'Typing Studio — Free Typing Test, Lessons and Practice';
+const description =
+  'Free typing tests, lessons and code practice that run entirely in your browser. No account, no tracking, works offline.';
+
+const faq: readonly FaqItem[] = [
+  {
+    question: 'Is Typing Studio free?',
+    answer:
+      'Yes, entirely. Every test, lesson, game and practice mode is free with no account, no signup and no paid tier.',
+  },
+  {
+    question: 'Do you store my typing data?',
+    answer:
+      'No. There is no server and no database. Your results are saved in your own browser and never transmitted anywhere. Clearing your browser data deletes them permanently.',
+  },
+  {
+    question: 'Does it work offline?',
+    answer:
+      'Yes. Typing Studio is a progressive web app, so once loaded it keeps working without an internet connection and can be installed to your home screen.',
+  },
+  {
+    question: 'Which languages are supported?',
+    answer:
+      'English and Portuguese for prose practice, plus dedicated modes for JavaScript, Python, SQL, HTML, CSS, numbers and symbols.',
+  },
+];
+
+const schemas = [
+  webApplicationSchema({
+    name: 'Typing Studio',
+    description,
+    routeKey: '',
+    locale,
+  }),
+  faqSchema(faq),
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey=""
+  locale={locale}
+  keywords={['typing test', 'typing practice', 'wpm test', 'learn to type', 'typing lessons']}
+  schemas={schemas}
+>
+  <HomeContent
+    locale={locale}
+    headline="Type faster. Measure everything. Share nothing."
+    subhead="Free typing tests, structured lessons and real code practice — running entirely in your browser, with your data staying on your device."
+    faq={faq}
+  />
+</BaseLayout>

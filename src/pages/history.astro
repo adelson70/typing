@@ -1,0 +1,51 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import RelatedLinks from '@/components/content/RelatedLinks.astro';
+import { StatisticsDashboard } from '@/features/stats/components/StatisticsDashboard';
+import { breadcrumbSchema } from '@/seo/jsonld';
+import { t } from '@/i18n/translations';
+import { LANDING_PAGES } from '@/data/pages';
+import type { BreadcrumbItem } from '@/types/seo';
+
+const locale = 'en' as const;
+
+const title = 'Typing History — Every Test You Have Taken';
+const description =
+  'Your complete typing test history, stored on your own device. Review past results and track how your speed has changed.';
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'stats.history') },
+];
+
+const related = LANDING_PAGES.filter((page) =>
+  ['typing-test', 'daily-challenge', 'typing-test-1-minute'].includes(page.key),
+).map((page) => ({
+  title: page.content[locale].h1,
+  description: page.content[locale].description,
+  routeKey: page.key,
+}));
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey="history"
+  locale={locale}
+  schemas={[breadcrumbSchema(breadcrumbs)]}
+  availableLocales={['en']}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold">{t(locale, 'stats.history')}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{description}</p>
+  </header>
+
+  <div class="mt-10">
+    <StatisticsDashboard client:only="react" locale={locale} />
+  </div>
+
+  <RelatedLinks heading={t(locale, 'common.relatedPages')} links={related} locale={locale} />
+</BaseLayout>

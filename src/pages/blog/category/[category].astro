@@ -1,0 +1,114 @@
+---
+/**
+ * Blog category hub.
+ *
+ * Generated only for categories that contain articles — an empty category page
+ * is thin content, and publishing one per enum value would create a dozen
+ * near-identical low-value URLs.
+ */
+import type { GetStaticPaths } from 'astro';
+import { getCollection } from 'astro:content';
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import Card from '@/components/ui/Card.astro';
+
+import { DEFAULT_LOCALE, type Locale } from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+import { CATEGORY_META, type CategoryMeta } from '@/data/blogCategories';
+import { breadcrumbSchema, collectionPageSchema } from '@/seo/jsonld';
+import type { BreadcrumbItem } from '@/types/seo';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const used = new Set(posts.map((post) => post.data.category));
+
+  return CATEGORY_META.filter((category) => used.has(category.slug)).map((category) => ({
+    params: { category: category.slug },
+    props: { category },
+  }));
+};
+
+interface Props {
+  category: CategoryMeta;
+}
+
+const { category } = Astro.props;
+const locale: Locale = DEFAULT_LOCALE;
+const meta = category.content[locale];
+
+const posts = (
+  await getCollection(
+    'blog',
+    ({ data }) => !data.draft && data.locale === locale && data.category === category.slug,
+  )
+).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'nav.blog'), path: 'blog' },
+  { name: meta.label },
+];
+
+const title = `${meta.label} — Typing Articles`;
+const routeKey = `blog/category/${category.slug}`;
+
+const schemas = [
+  collectionPageSchema({
+    name: title,
+    description: meta.description,
+    routeKey,
+    locale,
+    items: posts.map((post) => ({ name: post.data.title, path: `/blog/${post.id}/` })),
+  }),
+  breadcrumbSchema(breadcrumbs),
+];
+
+const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' });
+---
+
+<BaseLayout
+  title={title}
+  description={meta.description}
+  routeKey={routeKey}
+  locale={locale}
+  schemas={schemas}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="max-w-(--container-prose)">
+    <p class="text-xs font-medium uppercase tracking-wide text-accent">
+      {t(locale, 'common.category')}
+    </p>
+    <h1 class="mt-2 text-4xl font-bold">{meta.label}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{meta.description}</p>
+  </header>
+
+  <ul class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      posts.map((post) => (
+        <li>
+          <Card href={`/blog/${post.id}/`} padding="md" class="flex h-full flex-col">
+            <h2 class="text-lg font-semibold text-fg">{post.data.title}</h2>
+            <p class="mt-2 flex-1 text-sm text-fg-muted">{post.data.description}</p>
+            <p class="mt-4 flex items-center gap-2 text-xs text-fg-subtle">
+              <time datetime={post.data.pubDate.toISOString()}>
+                {dateFormatter.format(post.data.pubDate)}
+              </time>
+              <span aria-hidden="true">·</span>
+              <span>
+                {post.data.readingTime} {t(locale, 'common.minuteRead')}
+              </span>
+            </p>
+          </Card>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="mt-10">
+    <a href="/blog/" class="text-sm font-medium text-accent hover:underline">
+      ← {t(locale, 'nav.blog')}
+    </a>
+  </p>
+</BaseLayout>

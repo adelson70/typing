@@ -1,0 +1,51 @@
+---
+/**
+ * Desktop advertising column.
+ *
+ * Only rendered at `xl` (1280px) and above. Below that the viewport belongs to
+ * the content: a 300px column on a tablet squeezes the typing arena to the
+ * point where the primary task suffers, and typing traffic skews mobile.
+ *
+ * The unit is sticky so a single impression stays in view while the reader
+ * scrolls, which is worth more than several units that scroll past unseen.
+ *
+ * Resilience: this renders inside a CSS grid column that only exists at `xl`.
+ * If the ad is blocked or never fills, the column collapses to empty space and
+ * the layout is unchanged — nothing reflows, and no gap appears mid-content.
+ */
+import { ADSENSE_CLIENT_ID } from '@/constants/site';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+const enabled = ADSENSE_CLIENT_ID.length > 0;
+---
+
+{
+  enabled && (
+    <aside
+      class:list={['hidden xl:block', className]}
+      aria-label="Advertisement"
+      data-ts-ad-slot="sidebar"
+    >
+      <div class="sticky top-24">
+        {/* Reserved height prevents the sticky container from collapsing
+            before the unit fills. */}
+        <div class="min-h-[600px] w-[300px]">
+          <ins
+            class="adsbygoogle block"
+            style="display:block;width:300px;height:600px"
+            data-ad-client={ADSENSE_CLIENT_ID}
+            data-ad-slot=""
+            data-ad-format="vertical"
+          />
+          <script is:inline>
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+      </div>
+    </aside>
+  )
+}

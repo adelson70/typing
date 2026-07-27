@@ -1,0 +1,60 @@
+---
+/**
+ * Statistics dashboard.
+ *
+ * The page shell is static; the numbers come from IndexedDB after hydration,
+ * because per-user data cannot exist at build time on a zero-backend site.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import RelatedLinks from '@/components/content/RelatedLinks.astro';
+import { StatisticsDashboard } from '@/features/stats/components/StatisticsDashboard';
+
+import { breadcrumbSchema } from '@/seo/jsonld';
+import { t } from '@/i18n/translations';
+import { LANDING_PAGES } from '@/data/pages';
+import type { BreadcrumbItem } from '@/types/seo';
+
+const locale = 'en' as const;
+
+const title = 'Your Typing Statistics — Progress and History';
+const description =
+  'Track your typing speed and accuracy over time. All statistics are stored on your own device and never leave your browser.';
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'stats.title') },
+];
+
+const related = LANDING_PAGES.filter((page) =>
+  ['typing-test', 'daily-challenge', 'typing-test-5-minutes'].includes(page.key),
+).map((page) => ({
+  title: page.content[locale].h1,
+  description: page.content[locale].description,
+  routeKey: page.key,
+}));
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey="statistics"
+  locale={locale}
+  schemas={[breadcrumbSchema(breadcrumbs)]}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold">{t(locale, 'stats.title')}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{description}</p>
+  </header>
+
+  {/* client:only — this component reads IndexedDB and has no meaningful
+      server-rendered form, so prerendering it would only produce a skeleton
+      that React immediately replaces. */}
+  <div class="mt-10">
+    <StatisticsDashboard client:only="react" locale={locale} />
+  </div>
+
+  <RelatedLinks heading={t(locale, 'common.relatedPages')} links={related} locale={locale} />
+</BaseLayout>

@@ -1,0 +1,28 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { t } from '@/i18n/translations';
+
+const locale = 'en' as const;
+---
+
+<BaseLayout
+  title="Offline — Typing Studio"
+  description="You are currently offline. Cached practice pages remain available."
+  routeKey="offline"
+  locale={locale}
+  noindex={true}
+>
+  <div class="mx-auto max-w-(--container-prose) py-16 text-center">
+    <h1 class="text-3xl font-bold">{t(locale, 'pwa.offline')}</h1>
+    <p class="mt-4 text-fg-muted">
+      This page has not been cached yet. Pages you have already visited remain available,
+      and any test you start will still record its result locally.
+    </p>
+    <a
+      href="/typing-test/"
+      class="mt-8 inline-flex min-h-11 items-center rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-fg"
+    >
+      {t(locale, 'common.startTyping')}
+    </a>
+  </div>
+</BaseLayout>

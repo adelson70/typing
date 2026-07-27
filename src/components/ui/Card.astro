@@ -1,0 +1,45 @@
+---
+/**
+ * Surface container. When `href` is set the whole card becomes one link — a
+ * single tab stop rather than several, which is what a card should be.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends Omit<HTMLAttributes<'div'>, 'href'> {
+  href?: string | undefined;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const { href, padding = 'md', class: className, ...rest } = Astro.props;
+
+const PADDING: Record<NonNullable<Props['padding']>, string> = {
+  none: '',
+  sm: 'p-4',
+  md: 'p-5 sm:p-6',
+  lg: 'p-6 sm:p-8',
+};
+
+const base = 'rounded-xl border border-border bg-surface';
+// `ts-lift` supplies the transform and shadow together, so the card rises and
+// gains depth as one motion rather than two competing transitions.
+const interactive =
+  'ts-lift hover:border-border-strong hover:bg-surface-raised ' +
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+
+const classes = [base, PADDING[padding], href && interactive, className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  href ? (
+    <a href={href} class={`block ${classes}`} {...rest}>
+      <slot />
+    </a>
+  ) : (
+    <div class={classes} {...rest}>
+      <slot />
+    </div>
+  )
+}

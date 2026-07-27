@@ -1,0 +1,8 @@
+# esbuild (pulled in by Vite/Astro) runs a postinstall script to fetch its
+# platform binary. pnpm blocks build scripts by default, so they are approved here
+# — without this, `pnpm install` exits 1 with ERR_PNPM_IGNORED_BUILDS and
+# `pnpm dev` / `pnpm build` fail before Astro ever starts.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true

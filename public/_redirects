@@ -1,0 +1,10 @@
+# Cloudflare Pages redirects. Format: [source] [destination] [code]
+# Copied verbatim from public/ to the root of dist/ at build time.
+#
+# Astro is configured with `trailingSlash: 'always'` and directory-format
+# output, and Cloudflare Pages already normalises /page.html -> /page and
+# /page/index.html -> /page/, so no rules are needed for that.
+#
+# Add permanent redirects here when a route is renamed, so existing rankings
+# and inbound links follow the page instead of hitting the 404:
+#   /old-route/ /new-route/ 301

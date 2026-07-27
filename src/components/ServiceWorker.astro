@@ -1,0 +1,20 @@
+---
+/**
+ * Registers the service worker after load.
+ *
+ * Deliberately waits for the `load` event: registration competes for bandwidth
+ * with the resources needed for first paint, and precaching during startup is a
+ * common cause of a poor LCP on the first visit.
+ */
+---
+
+<script is:inline>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
+        // Registration fails on insecure origins and in some private modes.
+        // The site works without it; there is nothing to recover here.
+      });
+    });
+  }
+</script>

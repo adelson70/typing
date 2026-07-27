@@ -1,0 +1,33 @@
+---
+/**
+ * Serialises a JSON-LD document into a script tag.
+ *
+ * Two escapes are applied, both security- rather than style-motivated:
+ *   - `<` becomes `<` so a string containing `</script>` cannot break out
+ *     of the script element — the classic inline-JSON XSS vector.
+ *   - U+2028 and U+2029 are valid inside JSON but terminate a JavaScript line,
+ *     so they are escaped to keep the emitted script parseable.
+ */
+import type { JsonLdDocument } from '@/types/seo';
+
+interface Props {
+  schema: JsonLdDocument | readonly JsonLdDocument[];
+}
+
+const { schema } = Astro.props;
+
+const payload = Array.isArray(schema) ? schema : [schema];
+const json = payload.map((node) => JSON.stringify(node)).join(',');
+
+// Built from char codes so this source file stays pure ASCII — a literal
+// U+2028 here would break the very parser that reads this file.
+const LINE_SEPARATOR = String.fromCharCode(0x2028);
+const PARAGRAPH_SEPARATOR = String.fromCharCode(0x2029);
+
+const serialized = (payload.length > 1 ? `[${json}]` : json)
+  .replaceAll('<', '\\u003c')
+  .replaceAll(LINE_SEPARATOR, '\\u2028')
+  .replaceAll(PARAGRAPH_SEPARATOR, '\\u2029');
+---
+
+<script type="application/ld+json" is:inline set:html={serialized} />

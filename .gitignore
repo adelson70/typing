@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Astro / Vite
+.astro/
+dist/
+.vite/
+
+# Local secrets (optional; site config is in src/constants/site.ts)
+.env
+.env.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Vitest
+coverage/
+
+# Playwright (smoke tests in scripts/smoke-test.mjs)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Other package managers (project uses pnpm)
+package-lock.json
+yarn.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors (local overrides)
+.idea/
+*.swp
+*~
+.vscode/*
+!.vscode/extensions.json
+
+# Optional local deploy tooling
+.vercel
+.netlify
+.wrangler/

@@ -1,0 +1,114 @@
+---
+/**
+ * Blog index (default locale).
+ *
+ * Lists every published article and links the category hubs, so the whole blog
+ * is reachable within two clicks of the site root.
+ */
+import { getCollection } from 'astro:content';
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import Card from '@/components/ui/Card.astro';
+import AdSlot from '@/components/ads/AdSlot.astro';
+import WithSidebar from '@/components/layout/WithSidebar.astro';
+
+import { DEFAULT_LOCALE, localizedPath } from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+import { CATEGORY_META } from '@/data/blogCategories';
+import { breadcrumbSchema, collectionPageSchema } from '@/seo/jsonld';
+import type { BreadcrumbItem } from '@/types/seo';
+
+const locale = DEFAULT_LOCALE;
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft && data.locale === locale))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+// Only show categories that actually have articles — an empty category page is
+// a thin-content liability, not an SEO asset.
+const usedCategories = new Set(posts.map((post) => post.data.category));
+const categories = CATEGORY_META.filter((category) => usedCategories.has(category.slug));
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'nav.blog') },
+];
+
+const title = 'Typing Blog — Guides on Speed, Accuracy and Technique';
+const description =
+  'Practical, evidence-based articles on typing speed, accuracy, ergonomics and keyboard technique. No fluff, no filler.';
+
+const schemas = [
+  collectionPageSchema({
+    name: title,
+    description,
+    routeKey: 'blog',
+    locale,
+    items: posts.map((post) => ({ name: post.data.title, path: `/blog/${post.id}/` })),
+  }),
+  breadcrumbSchema(breadcrumbs),
+];
+
+const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' });
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey="blog"
+  locale={locale}
+  schemas={schemas}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold">{t(locale, 'nav.blog')}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{description}</p>
+  </header>
+
+  <nav class="mt-8" aria-label={t(locale, 'common.allCategories')}>
+    <ul class="flex flex-wrap gap-2">
+      {
+        categories.map((category) => (
+          <li>
+            <a
+              href={localizedPath(locale, `blog/category/${category.slug}`)}
+              class="inline-flex min-h-9 items-center rounded-full border border-border px-3.5 py-1.5 text-sm text-fg-muted transition-colors hover:border-border-strong hover:bg-surface-raised hover:text-fg"
+            >
+              {category.content[locale].label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  <AdSlot placement="leaderboard" class="mt-10" />
+
+  <WithSidebar class="mt-10">
+  <ul class="grid gap-5 sm:grid-cols-2 xl:grid-cols-2">
+    {
+      posts.map((post) => (
+        <li>
+          <Card href={`/blog/${post.id}/`} padding="md" class="flex h-full flex-col">
+            <p class="text-xs uppercase tracking-wide text-accent">
+              {CATEGORY_META.find((c) => c.slug === post.data.category)?.content[locale].label}
+            </p>
+            <h2 class="mt-2 text-lg font-semibold text-fg">{post.data.title}</h2>
+            <p class="mt-2 flex-1 text-sm text-fg-muted">{post.data.description}</p>
+            <p class="mt-4 flex items-center gap-2 text-xs text-fg-subtle">
+              <time datetime={post.data.pubDate.toISOString()}>
+                {dateFormatter.format(post.data.pubDate)}
+              </time>
+              <span aria-hidden="true">·</span>
+              <span>
+                {post.data.readingTime} {t(locale, 'common.minuteRead')}
+              </span>
+            </p>
+          </Card>
+        </li>
+      ))
+    }
+  </ul>
+  </WithSidebar>
+</BaseLayout>

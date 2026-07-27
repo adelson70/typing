@@ -1,0 +1,40 @@
+---
+/**
+ * Applies the persisted theme before first paint.
+ *
+ * Must stay inline and in `<head>` — any deferred or bundled alternative runs
+ * after the first paint and produces a visible light/dark flash. Kept
+ * deliberately tiny; it is duplicated into every HTML document.
+ */
+import { THEME_STORAGE_KEY } from '@/constants/storage';
+---
+
+<script is:inline define:vars={{ key: THEME_STORAGE_KEY }}>
+  (() => {
+    const apply = () => {
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.dataset.theme = stored;
+        } else {
+          // No stored choice: let the CSS `prefers-color-scheme` query decide.
+          delete document.documentElement.dataset.theme;
+        }
+      } catch {
+        // Private mode / storage disabled — fall back to the CSS default.
+      }
+    };
+
+    apply();
+
+    /*
+     * Re-apply after client-side navigation.
+     *
+     * `ClientRouter` swaps the document element, which discards `data-theme`
+     * and reverts the page to the OS preference even though the user's choice
+     * is still stored. `astro:after-swap` fires before the new document paints,
+     * so restoring it here avoids a flash.
+     */
+    document.addEventListener('astro:after-swap', apply);
+  })();
+</script>

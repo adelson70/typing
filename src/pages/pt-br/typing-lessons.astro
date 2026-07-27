@@ -1,0 +1,111 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import Card from '@/components/ui/Card.astro';
+import FaqSection from '@/components/content/FaqSection.astro';
+import RelatedLinks from '@/components/content/RelatedLinks.astro';
+import { breadcrumbSchema, collectionPageSchema, faqSchema } from '@/seo/jsonld';
+import { t } from '@/i18n/translations';
+import { localizedPath } from '@/constants/i18n';
+import { LESSONS } from '@/data/lessons';
+import { LANDING_PAGES } from '@/data/pages';
+import type { BreadcrumbItem, FaqItem } from '@/types/seo';
+
+const locale = 'pt-br' as const;
+
+const title = 'Lições de Digitação — Prática Estruturada';
+const description =
+  'Lições de digitação gratuitas que vão da linha de descanso à fluência completa, com metas de precisão em cada etapa.';
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'nav.lessons') },
+];
+
+const faq: readonly FaqItem[] = [
+  {
+    question: 'Em que ordem devo fazer as lições?',
+    answer:
+      'Siga a sequência. Cada lição pressupõe as teclas ensinadas antes dela, e a ordem segue a força dos dedos e a dificuldade de alcance, não o alfabeto.',
+  },
+  {
+    question: 'Quanto tempo deve durar cada lição?',
+    answer:
+      'De dez a quinze minutos é o ideal. O aprendizado motor responde muito melhor a sessões diárias curtas do que a sessões longas ocasionais, e a precisão cai bastante depois de vinte minutos.',
+  },
+  {
+    question: 'Quando devo passar para a próxima lição?',
+    answer:
+      'Quando conseguir completar a atual com 97% de precisão sem olhar para o teclado. A velocidade vem depois — avançar antes da precisão firme embute erros na base.',
+  },
+  {
+    question: 'Preciso terminar as lições antes de fazer um teste?',
+    answer:
+      'Não. Fazer um teste cedo dá uma referência útil. Só evite julgar seu progresso pelos testes nas primeiras semanas, quando mudanças de técnica te deixam temporariamente mais lento.',
+  },
+];
+
+const schemas = [
+  collectionPageSchema({
+    name: title,
+    description,
+    routeKey: 'pt-br/typing-lessons',
+    locale,
+    items: LESSONS.map((lesson) => ({
+      name: lesson.content[locale].title,
+      path: localizedPath(locale, lesson.practiceRoute),
+    })),
+  }),
+  breadcrumbSchema(breadcrumbs),
+  faqSchema(faq),
+];
+
+const related = LANDING_PAGES.filter((page) =>
+  ['typing-test', 'numbers-typing', 'symbols-typing'].includes(page.key),
+).map((page) => ({
+  title: page.content[locale].h1,
+  description: page.content[locale].description,
+  routeKey: page.key,
+}));
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey="typing-lessons"
+  locale={locale}
+  keywords={['lições de digitação', 'aprender a digitar', 'curso de digitação']}
+  schemas={schemas}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold">{t(locale, 'nav.lessons')}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{description}</p>
+  </header>
+
+  <ol class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      LESSONS.map((lesson, index) => (
+        <li>
+          <Card href={localizedPath(locale, lesson.practiceRoute)} padding="md" class="h-full">
+            <div class="flex items-center gap-3">
+              <span class="grid size-8 shrink-0 place-items-center rounded-md bg-surface-raised font-mono text-sm text-fg-muted">
+                {index + 1}
+              </span>
+              <h2 class="font-medium text-fg">{lesson.content[locale].title}</h2>
+            </div>
+            <p class="mt-3 text-sm text-fg-muted">{lesson.content[locale].description}</p>
+            <p class="mt-4 font-mono text-xs text-fg-subtle">{lesson.keys}</p>
+          </Card>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="mx-auto max-w-(--container-prose)">
+    <FaqSection items={faq} locale={locale} />
+  </div>
+
+  <RelatedLinks heading={t(locale, 'common.relatedPages')} links={related} locale={locale} />
+</BaseLayout>

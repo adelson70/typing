@@ -1,0 +1,156 @@
+---
+/**
+ * Blog article page.
+ *
+ * Every article closes with links to the tools it discussed and to sibling
+ * articles, which is what turns the blog from a content silo into the top of a
+ * funnel — and keeps the internal link graph dense.
+ */
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import RelatedLinks from '@/components/content/RelatedLinks.astro';
+import AdSlot from '@/components/ads/AdSlot.astro';
+import WithSidebar from '@/components/layout/WithSidebar.astro';
+
+import { localizedPath } from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+import { getLandingPage } from '@/data/pages';
+import { CATEGORY_META } from '@/data/blogCategories';
+import { blogPostingSchema, breadcrumbSchema } from '@/seo/jsonld';
+import type { BreadcrumbItem } from '@/types/seo';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+};
+
+type Props = { post: Awaited<ReturnType<typeof getCollection<'blog'>>>[number] };
+
+const { post } = Astro.props;
+const { data } = post;
+const locale = data.locale;
+const { Content } = await render(post);
+
+const category = CATEGORY_META.find((c) => c.slug === data.category);
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'nav.blog'), path: 'blog' },
+  { name: data.title },
+];
+
+// Tool pages this article recommends — resolved so a bad key is visible at
+// build time rather than shipping as a broken link.
+const toolLinks = data.relatedPages
+  .map((key) => getLandingPage(key))
+  .filter((page) => page !== undefined)
+  .map((page) => ({
+    title: page.content[locale].h1,
+    description: page.content[locale].description,
+    routeKey: page.key,
+  }));
+
+const allPosts = await getCollection('blog', ({ data: d }) => !d.draft && d.locale === locale);
+const articleLinks = data.relatedArticles
+  .map((slug) => allPosts.find((candidate) => candidate.id === slug))
+  .filter((candidate) => candidate !== undefined)
+  .map((candidate) => ({
+    title: candidate.data.title,
+    description: candidate.data.description,
+    routeKey: `blog/${candidate.id}`,
+  }));
+
+const schemas = [
+  blogPostingSchema({
+    title: data.title,
+    description: data.description,
+    routeKey: `blog/${post.id}`,
+    locale,
+    publishedTime: data.pubDate,
+    ...(data.updatedDate ? { modifiedTime: data.updatedDate } : {}),
+  }),
+  breadcrumbSchema(breadcrumbs),
+];
+
+const dateFormatter = new Intl.DateTimeFormat(locale === 'pt-br' ? 'pt-BR' : 'en-US', {
+  dateStyle: 'long',
+});
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  routeKey={`blog/${post.id}`}
+  locale={locale}
+  keywords={data.keywords}
+  ogType="article"
+  publishedTime={data.pubDate}
+  modifiedTime={data.updatedDate}
+  schemas={schemas}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <WithSidebar>
+  <article class="max-w-(--container-prose)">
+    <header>
+      {
+        category && (
+          <a
+            href={localizedPath(locale, `blog/category/${category.slug}`)}
+            class="text-xs font-medium uppercase tracking-wide text-accent transition-opacity hover:opacity-80"
+          >
+            {category.content[locale].label}
+          </a>
+        )
+      }
+      <h1 class="mt-3 text-4xl font-bold">{data.title}</h1>
+      <p class="mt-4 text-lg text-fg-muted">{data.description}</p>
+
+      <p class="mt-6 flex flex-wrap items-center gap-2 text-sm text-fg-subtle">
+        <time datetime={data.pubDate.toISOString()}>{dateFormatter.format(data.pubDate)}</time>
+        <span aria-hidden="true">·</span>
+        <span>{data.readingTime} {t(locale, 'common.minuteRead')}</span>
+        {
+          data.updatedDate && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>
+                {t(locale, 'common.updated')}{' '}
+                <time datetime={data.updatedDate.toISOString()}>
+                  {dateFormatter.format(data.updatedDate)}
+                </time>
+              </span>
+            </>
+          )
+        }
+      </p>
+    </header>
+
+    <div class="prose-ts mt-10">
+      <Content />
+    </div>
+  </article>
+
+  <AdSlot placement="in-article" class="mt-12 max-w-(--container-prose)" />
+  </WithSidebar>
+
+  <RelatedLinks
+    heading={t(locale, 'common.relatedModes')}
+    links={toolLinks}
+    locale={locale}
+    columns={3}
+  />
+
+  <RelatedLinks
+    heading={t(locale, 'common.relatedArticles')}
+    links={articleLinks}
+    locale={locale}
+    columns={3}
+  />
+</BaseLayout>

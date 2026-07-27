@@ -1,0 +1,74 @@
+---
+/**
+ * Shared homepage body, rendered by both the `/` and `/pt-br/` routes.
+ *
+ * Extracted so the two locale entry points hold only their metadata — the
+ * layout exists once, and a change to the homepage cannot land in one language
+ * and not the other.
+ */
+import Card from '@/components/ui/Card.astro';
+import Button from '@/components/ui/Button.astro';
+import AdSlot from '@/components/ads/AdSlot.astro';
+import FaqSection from '@/components/content/FaqSection.astro';
+import { TypingArena } from '@/features/typing/components/TypingArena';
+
+import { localizedPath, type Locale } from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+import { LANDING_PAGES } from '@/data/pages';
+import type { FaqItem } from '@/types/seo';
+
+interface Props {
+  locale: Locale;
+  headline: string;
+  subhead: string;
+  faq: readonly FaqItem[];
+}
+
+const { locale, headline, subhead, faq } = Astro.props;
+
+const featured = LANDING_PAGES.filter((page) =>
+  ['typing-test-1-minute', 'typing-test-5-minutes', 'programming-typing', 'daily-challenge', 'numbers-typing', 'symbols-typing'].includes(page.key),
+);
+
+const defaultSource = locale === 'pt-br' ? 'portuguese-200' : 'english-200';
+---
+
+<section class="text-center">
+  <h1 class="mx-auto max-w-4xl text-5xl font-bold">{headline}</h1>
+  <p class="mx-auto mt-5 max-w-2xl text-lg text-fg-muted">{subhead}</p>
+</section>
+
+<div class="mx-auto mt-12 max-w-(--container-arena)">
+  <TypingArena client:load locale={locale} mode="time" limit={60} sourceId={defaultSource} />
+</div>
+
+<div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+  <Button href={localizedPath(locale, 'typing-test')} variant="primary" size="lg">
+    {t(locale, 'common.startTyping')}
+  </Button>
+  <Button href={localizedPath(locale, 'typing-lessons')} variant="outline" size="lg">
+    {t(locale, 'nav.lessons')}
+  </Button>
+</div>
+
+<AdSlot placement="leaderboard" class="mx-auto mt-12 max-w-(--container-arena)" />
+
+<section class="mt-section">
+  <h2 class="text-2xl font-semibold">{t(locale, 'common.relatedModes')}</h2>
+  <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      featured.map((page) => (
+        <li>
+          <Card href={localizedPath(locale, page.key)} padding="md" class="h-full">
+            <h3 class="font-medium text-fg">{page.content[locale].h1}</h3>
+            <p class="mt-2 text-sm text-fg-muted">{page.content[locale].description}</p>
+          </Card>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<div class="mx-auto max-w-(--container-prose)">
+  <FaqSection items={faq} locale={locale} />
+</div>

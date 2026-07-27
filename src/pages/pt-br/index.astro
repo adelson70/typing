@@ -1,0 +1,61 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import HomeContent from '@/components/home/HomeContent.astro';
+import { faqSchema, webApplicationSchema } from '@/seo/jsonld';
+import type { FaqItem } from '@/types/seo';
+
+const locale = 'pt-br' as const;
+
+const title = 'Typing Studio — Teste de Digitação Grátis e Lições';
+const description =
+  'Testes de digitação, lições e prática de código que rodam no seu navegador. Sem conta, sem rastreamento, funciona offline.';
+
+const faq: readonly FaqItem[] = [
+  {
+    question: 'O Typing Studio é gratuito?',
+    answer:
+      'Sim, totalmente. Todos os testes, lições, jogos e modos de prática são gratuitos, sem conta, sem cadastro e sem versão paga.',
+  },
+  {
+    question: 'Vocês armazenam meus dados de digitação?',
+    answer:
+      'Não. Não existe servidor nem banco de dados. Seus resultados ficam salvos no seu próprio navegador e nunca são transmitidos. Limpar os dados do navegador os apaga permanentemente.',
+  },
+  {
+    question: 'Funciona offline?',
+    answer:
+      'Sim. O Typing Studio é um progressive web app, então depois de carregado continua funcionando sem internet e pode ser instalado na tela inicial.',
+  },
+  {
+    question: 'Quais idiomas são suportados?',
+    answer:
+      'Português e inglês para prática de texto, além de modos dedicados para JavaScript, Python, SQL, HTML, CSS, números e símbolos.',
+  },
+];
+
+const schemas = [
+  webApplicationSchema({
+    name: 'Typing Studio',
+    description,
+    routeKey: 'pt-br',
+    locale,
+  }),
+  faqSchema(faq),
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey=""
+  locale={locale}
+  keywords={['teste de digitação', 'praticar digitação', 'teste ppm', 'aprender a digitar']}
+  schemas={schemas}
+>
+  <HomeContent
+    locale={locale}
+    headline="Digite mais rápido. Meça tudo. Não compartilhe nada."
+    subhead="Testes de digitação, lições estruturadas e prática real de código — rodando inteiramente no seu navegador, com seus dados no seu dispositivo."
+    faq={faq}
+  />
+</BaseLayout>

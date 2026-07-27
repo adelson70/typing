@@ -1,0 +1,52 @@
+---
+/**
+ * Contextual internal links.
+ *
+ * Every page renders at least one of these, which is what keeps the link graph
+ * connected and prevents orphan pages. Descriptions are included because a link
+ * with context is worth more than a bare anchor, both to readers and to
+ * crawlers judging relevance.
+ */
+import Card from '@/components/ui/Card.astro';
+import { localizedPath, type Locale } from '@/constants/i18n';
+
+export interface RelatedLink {
+  readonly title: string;
+  readonly description: string;
+  /** Locale-agnostic route key. */
+  readonly routeKey: string;
+}
+
+interface Props {
+  heading: string;
+  links: readonly RelatedLink[];
+  locale: Locale;
+  columns?: 2 | 3;
+}
+
+const { heading, links, locale, columns = 3 } = Astro.props;
+---
+
+{
+  links.length > 0 && (
+    <section class="mt-section">
+      <h2 class="text-2xl font-semibold">{heading}</h2>
+
+      <ul
+        class:list={[
+          'ts-stagger mt-6 grid gap-4',
+          columns === 3 ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2',
+        ]}
+      >
+        {links.map((link, index) => (
+          <li style={`--ts-index: ${index}`}>
+            <Card href={localizedPath(locale, link.routeKey)} padding="md" class="h-full">
+              <h3 class="font-medium text-fg">{link.title}</h3>
+              <p class="mt-2 text-sm text-fg-muted">{link.description}</p>
+            </Card>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

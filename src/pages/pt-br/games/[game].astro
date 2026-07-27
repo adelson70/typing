@@ -1,0 +1,94 @@
+---
+/**
+ * Portuguese twin of `/games/[game]`.
+ *
+ * A separate file rather than a single catch-all: a catch-all over
+ * LOCALES × GAME_IDS would generate `/games/pt-br/word-rain/`, with the prefix
+ * in the wrong order. This mirrors the existing `src/pages/pt-br/` convention.
+ */
+import type { GetStaticPaths } from 'astro';
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import FaqSection from '@/components/content/FaqSection.astro';
+import RelatedLinks from '@/components/content/RelatedLinks.astro';
+import { GameArena } from '@/features/games/components/GameArena';
+import { GAME_PAGES, type GamePage } from '@/features/games/data/gamePages';
+
+import { breadcrumbSchema, faqSchema, webApplicationSchema } from '@/seo/jsonld';
+import { t } from '@/i18n/translations';
+import { localizedPath } from '@/constants/i18n';
+import { LANDING_PAGES } from '@/data/pages';
+import type { BreadcrumbItem } from '@/types/seo';
+
+interface Props {
+  page: GamePage;
+}
+
+export const getStaticPaths: GetStaticPaths = () =>
+  GAME_PAGES.map((page) => ({ params: { game: page.id }, props: { page } }));
+
+const { page } = Astro.props;
+const locale = 'pt-br' as const;
+const content = page.content[locale];
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'nav.games'), path: 'typing-games' },
+  { name: content.h1 },
+];
+
+const schemaKey = localizedPath(locale, page.routeKey).replace(/^\/|\/$/g, '');
+
+const related = LANDING_PAGES.filter((landing) =>
+  ['daily-challenge', 'typing-test-1-minute', 'typing-test'].includes(landing.key),
+).map((landing) => ({
+  title: landing.content[locale].h1,
+  description: landing.content[locale].description,
+  routeKey: landing.key,
+}));
+---
+
+<BaseLayout
+  title={content.title}
+  description={content.description}
+  routeKey={page.routeKey}
+  locale={locale}
+  keywords={content.keywords}
+  schemas={[
+    webApplicationSchema({
+      name: content.h1,
+      description: content.description,
+      routeKey: schemaKey,
+      locale,
+    }),
+    breadcrumbSchema(breadcrumbs),
+    faqSchema(content.faq),
+  ]}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold">{content.h1}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{content.description}</p>
+  </header>
+
+  <div class="mx-auto mt-8 max-w-(--container-arena)">
+    <GameArena client:load locale={locale} gameId={page.id} />
+  </div>
+
+  <section class="mx-auto mt-14 max-w-(--container-prose)">
+    <p class="text-fg-muted">{content.intro}</p>
+
+    <h2 class="mt-10 text-2xl font-semibold">{t(locale, 'game.howToPlay')}</h2>
+    <ol class="mt-4 list-decimal space-y-2 pl-5 text-fg-muted">
+      {content.howToPlay.map((rule) => <li>{rule}</li>)}
+    </ol>
+  </section>
+
+  <div class="mx-auto max-w-(--container-prose)">
+    <FaqSection items={content.faq} locale={locale} />
+  </div>
+
+  <RelatedLinks heading={t(locale, 'common.relatedPages')} links={related} locale={locale} />
+</BaseLayout>

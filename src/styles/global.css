@@ -1,0 +1,723 @@
+@import 'tailwindcss';
+
+/**
+ * `dark:` follows the resolved theme, not merely the OS preference.
+ *
+ * Matches when `data-theme="dark"` is set explicitly, or when no explicit
+ * choice exists and the OS asks for dark. Without this, `dark:` would disagree
+ * with the semantic tokens whenever a user overrides their system setting.
+ */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']) *) {
+      @slot;
+    }
+  }
+}
+
+/* ==========================================================================
+   DESIGN TOKENS — single source of truth for the entire visual system.
+   ==========================================================================
+   No component hardcodes a colour, size, radius or duration. Replacing the
+   values in this file re-skins the application without touching any markup.
+
+   Colours are OKLCH for perceptually-even ramps and predictable contrast.
+   Semantic tokens (--color-surface, --color-fg, …) resolve through
+   :root / [data-theme] below, so light and dark share one utility vocabulary.
+   ========================================================================== */
+
+@theme {
+  /* Wipe Tailwind's default palette — only project tokens generate utilities. */
+  --color-*: initial;
+
+  /* --- Ember: energy ----------------------------------------------------
+     Orange owns everything that rewards the player — combo, XP, streak,
+     level-up. It is deliberately the loudest colour on the page, and it is
+     never used for chrome or navigation, so a flash of orange always means
+     "you just did something well". */
+  --color-ember-50: oklch(0.97 0.03 62);
+  --color-ember-100: oklch(0.94 0.06 62);
+  --color-ember-200: oklch(0.89 0.11 62);
+  --color-ember-300: oklch(0.83 0.15 58);
+  --color-ember-400: oklch(0.77 0.18 52);
+  --color-ember-500: oklch(0.71 0.20 46);
+  --color-ember-600: oklch(0.63 0.21 42);
+  --color-ember-700: oklch(0.54 0.19 40);
+  --color-ember-800: oklch(0.44 0.15 38);
+  --color-ember-900: oklch(0.34 0.11 38);
+  --color-ember-950: oklch(0.24 0.08 38);
+
+  /* --- Volt: precision --------------------------------------------------
+     Blue carries structure and progress: links, focus rings, the caret,
+     accuracy. Cool against the orange so the two never compete for the same
+     meaning. */
+  --color-volt-50: oklch(0.97 0.02 232);
+  --color-volt-100: oklch(0.93 0.05 232);
+  --color-volt-200: oklch(0.88 0.09 232);
+  --color-volt-300: oklch(0.81 0.13 234);
+  --color-volt-400: oklch(0.74 0.16 236);
+  --color-volt-500: oklch(0.67 0.18 238);
+  --color-volt-600: oklch(0.58 0.19 242);
+  --color-volt-700: oklch(0.49 0.17 244);
+  --color-volt-800: oklch(0.40 0.13 246);
+  --color-volt-900: oklch(0.31 0.09 248);
+  --color-volt-950: oklch(0.22 0.06 250);
+
+  /* Legacy alias: `brand-*` maps onto Volt so any remaining reference keeps
+     resolving while the UI migrates to the semantic tokens below. */
+  --color-brand-400: var(--color-volt-400);
+  --color-brand-600: var(--color-volt-600);
+  --color-brand-700: var(--color-volt-700);
+
+  /* --- Neutral ramp ----------------------------------------------------- */
+  --color-neutral-0: oklch(1 0 0);
+  --color-neutral-50: oklch(0.98 0.002 265);
+  --color-neutral-100: oklch(0.96 0.003 265);
+  --color-neutral-200: oklch(0.92 0.004 265);
+  --color-neutral-300: oklch(0.86 0.006 265);
+  --color-neutral-400: oklch(0.71 0.008 265);
+  --color-neutral-500: oklch(0.57 0.01 265);
+  --color-neutral-600: oklch(0.45 0.011 265);
+  --color-neutral-700: oklch(0.36 0.012 265);
+  --color-neutral-800: oklch(0.26 0.012 265);
+  --color-neutral-850: oklch(0.21 0.012 265);
+  --color-neutral-900: oklch(0.17 0.011 265);
+  --color-neutral-950: oklch(0.13 0.01 265);
+  --color-neutral-1000: oklch(0.09 0.008 265);
+
+  /* --- Feedback (typing correctness states) ----------------------------- */
+  --color-success-400: oklch(0.78 0.16 155);
+  --color-success-500: oklch(0.68 0.17 155);
+  --color-success-600: oklch(0.58 0.16 155);
+
+  --color-danger-400: oklch(0.72 0.19 25);
+  --color-danger-500: oklch(0.63 0.22 25);
+  --color-danger-600: oklch(0.54 0.21 25);
+
+  --color-warning-400: oklch(0.82 0.15 85);
+  --color-warning-500: oklch(0.75 0.16 85);
+
+  --color-info-500: oklch(0.68 0.14 230);
+
+  /* --- Semantic aliases (resolved per theme, see :root blocks) ---------- */
+  --color-canvas: var(--ts-canvas);
+  --color-surface: var(--ts-surface);
+  --color-surface-raised: var(--ts-surface-raised);
+  --color-surface-sunken: var(--ts-surface-sunken);
+  --color-border: var(--ts-border);
+  --color-border-strong: var(--ts-border-strong);
+  --color-fg: var(--ts-fg);
+  --color-fg-muted: var(--ts-fg-muted);
+  --color-fg-subtle: var(--ts-fg-subtle);
+  --color-accent: var(--ts-accent);
+  --color-accent-fg: var(--ts-accent-fg);
+  --color-accent-muted: var(--ts-accent-muted);
+
+  /* Reward semantics — the gamification layer. Separate from `accent` so a
+     reward never looks like a link and a link never looks like a reward. */
+  --color-energy: var(--ts-energy);
+  --color-energy-fg: var(--ts-energy-fg);
+  --color-energy-muted: var(--ts-energy-muted);
+  --color-energy-glow: var(--ts-energy-glow);
+  --color-xp: var(--ts-xp);
+  --color-streak: var(--ts-streak);
+
+  /* Typing-specific semantics */
+  --color-type-pending: var(--ts-type-pending);
+  --color-type-correct: var(--ts-type-correct);
+  --color-type-incorrect: var(--ts-type-incorrect);
+  --color-type-incorrect-bg: var(--ts-type-incorrect-bg);
+  --color-type-caret: var(--ts-type-caret);
+  --color-type-current-bg: var(--ts-type-current-bg);
+
+  /* --- Typography ------------------------------------------------------- */
+  --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, 'Cascadia Code', monospace;
+
+  /* Fluid type scale — clamp() removes the need for per-breakpoint overrides. */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.625rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 1.875rem);
+  --text-2xl--line-height: 1.25;
+  --text-3xl: clamp(1.875rem, 1.6rem + 1.35vw, 2.5rem);
+  --text-3xl--line-height: 1.2;
+  --text-4xl: clamp(2.25rem, 1.85rem + 2vw, 3.25rem);
+  --text-4xl--line-height: 1.12;
+  --text-5xl: clamp(2.75rem, 2rem + 3.75vw, 4.5rem);
+  --text-5xl--line-height: 1.05;
+
+  /* Typing arena glyph size — deliberately its own scale. */
+  --text-type-sm: 1.125rem;
+  --text-type-md: clamp(1.25rem, 1.05rem + 1vw, 1.625rem);
+  --text-type-lg: clamp(1.5rem, 1.2rem + 1.5vw, 2.125rem);
+
+  /* --- Spacing ---------------------------------------------------------- */
+  --spacing: 0.25rem;
+  --spacing-gutter: clamp(1rem, 0.7rem + 1.5vw, 2rem);
+  --spacing-section: clamp(3rem, 2rem + 5vw, 6rem);
+
+  /* --- Radii ------------------------------------------------------------ */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* --- Elevation -------------------------------------------------------- */
+  --shadow-xs: 0 1px 2px 0 oklch(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 oklch(0 0 0 / 0.08), 0 1px 2px -1px oklch(0 0 0 / 0.06);
+  --shadow-md: 0 4px 12px -2px oklch(0 0 0 / 0.1), 0 2px 6px -2px oklch(0 0 0 / 0.06);
+  --shadow-lg: 0 12px 28px -6px oklch(0 0 0 / 0.14), 0 4px 10px -4px oklch(0 0 0 / 0.08);
+  --shadow-glow: 0 0 0 1px var(--ts-accent-muted), 0 8px 24px -8px var(--ts-accent-muted);
+
+  /* --- Layout ----------------------------------------------------------- */
+  --container-prose: 68ch;
+  --container-arena: 56rem;
+  --container-page: 80rem;
+  --container-wide: 90rem;
+
+  /* --- Breakpoints (mobile-first; 320px is the design floor) ------------ */
+  --breakpoint-xs: 22.5rem; /* 360px */
+  --breakpoint-sm: 40rem; /* 640px */
+  --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 64rem; /* 1024px */
+  --breakpoint-xl: 80rem; /* 1280px */
+  --breakpoint-2xl: 96rem; /* 1536px */
+
+  /* --- Motion ----------------------------------------------------------- */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-instant: 80ms;
+  --duration-fast: 140ms;
+  --duration-normal: 220ms;
+  --duration-slow: 380ms;
+}
+
+/* ==========================================================================
+   THEME RESOLUTION
+   ==========================================================================
+   Dark is the product's default identity. `[data-theme]` (set by the inline
+   no-flash script) always wins over the media query so the user's explicit
+   choice is honoured in both directions.
+   ========================================================================== */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --ts-canvas: var(--color-neutral-1000);
+  --ts-surface: var(--color-neutral-900);
+  --ts-surface-raised: var(--color-neutral-850);
+  --ts-surface-sunken: var(--color-neutral-950);
+  --ts-border: oklch(1 0 0 / 0.09);
+  --ts-border-strong: oklch(1 0 0 / 0.16);
+  --ts-fg: var(--color-neutral-50);
+  --ts-fg-muted: var(--color-neutral-400);
+  /* neutral-500 measured 4.27:1 on the card surface — below AA for small text. */
+  --ts-fg-subtle: var(--color-neutral-400);
+  --ts-accent: var(--color-volt-400);
+  --ts-accent-fg: var(--color-neutral-1000);
+  --ts-accent-muted: oklch(0.74 0.16 236 / 0.28);
+
+  /* Reward colours run hot against the dark canvas. */
+  --ts-energy: var(--color-ember-400);
+  --ts-energy-fg: var(--color-neutral-1000);
+  --ts-energy-muted: oklch(0.77 0.18 52 / 0.22);
+  --ts-energy-glow: oklch(0.77 0.18 52 / 0.45);
+  --ts-xp: var(--color-ember-300);
+  --ts-streak: var(--color-ember-500);
+
+  /*
+   * The prompt reads ahead of the cursor, so the *untyped* text carries the
+   * contrast and typed text recedes once it is done. Measured 4.2:1 between
+   * the two states when it was the other way round — too weak to track
+   * peripherally while typing, which is the only time it matters.
+   */
+  --ts-type-pending: var(--color-neutral-200);
+  --ts-type-correct: var(--color-neutral-400);
+  --ts-type-incorrect: var(--color-danger-400);
+  --ts-type-incorrect-bg: oklch(0.63 0.22 25 / 0.16);
+  /* The caret is ember: it marks where your next reward lands. */
+  --ts-type-caret: var(--color-ember-400);
+  --ts-type-current-bg: oklch(1 0 0 / 0.06);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --ts-canvas: var(--color-neutral-0);
+  --ts-surface: var(--color-neutral-50);
+  --ts-surface-raised: var(--color-neutral-0);
+  --ts-surface-sunken: var(--color-neutral-100);
+  --ts-border: oklch(0 0 0 / 0.1);
+  --ts-border-strong: oklch(0 0 0 / 0.18);
+  --ts-fg: var(--color-neutral-950);
+  --ts-fg-muted: var(--color-neutral-600);
+  --ts-fg-subtle: var(--color-neutral-600);
+  /* volt-600 measured 4.48:1 on white — just under AA for small text. */
+  --ts-accent: var(--color-volt-700);
+  --ts-accent-fg: var(--color-neutral-0);
+  --ts-accent-muted: oklch(0.49 0.17 244 / 0.20);
+
+  /* Ember must go darker on white: ember-400 measures ~2.2:1 there. */
+  --ts-energy: var(--color-ember-700);
+  --ts-energy-fg: var(--color-neutral-0);
+  --ts-energy-muted: oklch(0.54 0.19 40 / 0.16);
+  --ts-energy-glow: oklch(0.54 0.19 40 / 0.28);
+  --ts-xp: var(--color-ember-700);
+  --ts-streak: var(--color-ember-700);
+
+  /*
+   * Same inversion as dark: untyped text leads, typed text recedes.
+   * neutral-900 measured 4.23:1 on the light card — technically AA for large
+   * text, but this is the most-read element on the page, so it goes darker.
+   */
+  --ts-type-pending: var(--color-neutral-950);
+  --ts-type-correct: var(--color-neutral-600);
+  --ts-type-incorrect: var(--color-danger-600);
+  --ts-type-incorrect-bg: oklch(0.63 0.22 25 / 0.12);
+  --ts-type-caret: var(--color-ember-700);
+  --ts-type-current-bg: oklch(0 0 0 / 0.05);
+}
+
+/*
+ * Respect the OS preference only when the user has made no explicit choice.
+ *
+ * `:where()` keeps specificity at zero so the explicit `[data-theme]` block
+ * above always wins. The token values are declared once, in the rule above,
+ * and inherited here — duplicating them previously let the two blocks drift
+ * out of sync, which shipped a real contrast bug.
+ */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+
+    --ts-canvas: var(--color-neutral-0);
+    --ts-surface: var(--color-neutral-50);
+    --ts-surface-raised: var(--color-neutral-0);
+    --ts-surface-sunken: var(--color-neutral-100);
+    --ts-border: oklch(0 0 0 / 0.1);
+    --ts-border-strong: oklch(0 0 0 / 0.18);
+    --ts-fg: var(--color-neutral-950);
+    --ts-fg-muted: var(--color-neutral-600);
+    --ts-fg-subtle: var(--color-neutral-600);
+    /* volt-600 measured 4.48:1 on white — just under AA for small text. */
+    --ts-accent: var(--color-volt-700);
+    --ts-accent-fg: var(--color-neutral-0);
+    --ts-accent-muted: oklch(0.49 0.17 244 / 0.20);
+
+    /* Ember must go darker on white: ember-400 measures ~2.2:1 there. */
+    --ts-energy: var(--color-ember-700);
+    --ts-energy-fg: var(--color-neutral-0);
+    --ts-energy-muted: oklch(0.54 0.19 40 / 0.16);
+    --ts-energy-glow: oklch(0.54 0.19 40 / 0.28);
+    --ts-xp: var(--color-ember-700);
+    --ts-streak: var(--color-ember-700);
+
+    /*
+     * Same inversion as dark: untyped text leads, typed text recedes.
+     * neutral-900 measured 4.23:1 on the light card — technically AA for large
+     * text, but this is the most-read element on the page, so it goes darker.
+     */
+    --ts-type-pending: var(--color-neutral-950);
+    --ts-type-correct: var(--color-neutral-500);
+    --ts-type-incorrect: var(--color-danger-600);
+    --ts-type-incorrect-bg: oklch(0.63 0.22 25 / 0.12);
+    --ts-type-caret: var(--color-ember-700);
+    --ts-type-current-bg: oklch(0 0 0 / 0.05);
+  }
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* Offset anchor targets so sticky header never covers a heading. */
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100svh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p, li {
+    text-wrap: pretty;
+  }
+
+  /* Visible, consistent focus ring for keyboard users only. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  /* Never remove focus styling without a replacement. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-muted);
+    color: var(--color-fg);
+  }
+
+  /* Consistent, themed scrollbars. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+}
+
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* Screen-reader-only text that becomes visible when focused (skip links). */
+@utility sr-only-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+
+  &:focus {
+    position: fixed;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION — WCAG 2.3.3
+   ==========================================================================
+   Animations are disabled rather than merely shortened, and smooth scrolling
+   is turned off, for users who request reduced motion at the OS level.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* The caret must stop blinking, but must stay visible. */
+  .ts-caret {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ==========================================================================
+   PROSE — long-form article typography
+   ==========================================================================
+   Hand-rolled rather than @tailwindcss/typography: the plugin ships a large
+   stylesheet of defaults that would then need overriding to match these tokens,
+   and article layout is a small, well-understood problem.
+   ========================================================================== */
+
+@layer components {
+  .prose-ts {
+    color: var(--color-fg-muted);
+    font-size: var(--text-base);
+    line-height: 1.75;
+  }
+
+  .prose-ts > * + * {
+    margin-top: 1.25em;
+  }
+
+  .prose-ts h2 {
+    margin-top: 2.5em;
+    margin-bottom: 0.75em;
+    color: var(--color-fg);
+    font-size: var(--text-2xl);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
+  .prose-ts h3 {
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+    color: var(--color-fg);
+    font-size: var(--text-xl);
+    line-height: 1.4;
+  }
+
+  .prose-ts strong {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+
+  .prose-ts a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: opacity var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .prose-ts a:hover {
+    opacity: 0.75;
+  }
+
+  .prose-ts ul,
+  .prose-ts ol {
+    padding-left: 1.5em;
+  }
+
+  .prose-ts ul {
+    list-style-type: disc;
+  }
+
+  .prose-ts ol {
+    list-style-type: decimal;
+  }
+
+  .prose-ts li + li {
+    margin-top: 0.5em;
+  }
+
+  .prose-ts li::marker {
+    color: var(--color-fg-subtle);
+  }
+
+  .prose-ts code {
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-xs);
+    background-color: var(--color-surface-raised);
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+
+  .prose-ts pre {
+    overflow-x: auto;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface-sunken);
+  }
+
+  .prose-ts pre code {
+    padding: 0;
+    background: none;
+  }
+
+  .prose-ts blockquote {
+    padding-left: 1.25em;
+    border-left: 3px solid var(--color-accent);
+    color: var(--color-fg);
+    font-style: italic;
+  }
+
+  /* Tables must scroll rather than force the page to scroll horizontally. */
+  .prose-ts table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .prose-ts th,
+  .prose-ts td {
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--color-border);
+    text-align: left;
+  }
+
+  .prose-ts th {
+    background-color: var(--color-surface-raised);
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+
+  .prose-ts hr {
+    margin-block: 2.5em;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+/* ==========================================================================
+   MICRO-INTERACTIONS
+   ==========================================================================
+   Every animation here is decorative. The reduced-motion block at the top of
+   this file disables all of them, and none carries information that is lost
+   when they are off.
+
+   Durations and curves come from the motion tokens rather than being written
+   inline, so the whole system can be retimed from one place.
+   ========================================================================== */
+
+@keyframes ts-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.09); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ts-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2.5px); }
+  75% { transform: translateX(2.5px); }
+}
+
+@keyframes ts-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ts-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(220%); }
+}
+
+@keyframes ts-flame {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(1.18) rotate(-6deg); }
+  60% { transform: scale(1.06) rotate(4deg); }
+}
+
+@layer components {
+  /* A correct keystroke: a brief swell, gone before it can distract. */
+  .ts-pop {
+    animation: ts-pop var(--duration-normal) var(--ease-spring);
+  }
+
+  /* An error: a small lateral shake. Deliberately does not change size, so
+     surrounding characters never reflow. */
+  .ts-shake {
+    animation: ts-shake var(--duration-fast) var(--ease-out-quart);
+  }
+
+  /* Entry animation for cards, list items and headings. */
+  .ts-rise {
+    animation: ts-rise var(--duration-slow) var(--ease-out-quart) backwards;
+  }
+
+  /*
+   * Staggered entry.
+   *
+   * The delay is driven by a custom property the markup sets per item, so one
+   * class covers any list length instead of needing a rule per index.
+   */
+  .ts-stagger > * {
+    animation: ts-rise var(--duration-slow) var(--ease-out-quart) backwards;
+    animation-delay: calc(var(--ts-index, 0) * 45ms);
+  }
+
+  /* Level-up: a highlight travelling along the XP bar. */
+  .ts-sweep::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inline-size: 40%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-energy-glow),
+      transparent
+    );
+    animation: ts-sweep var(--duration-slow) var(--ease-out-quart);
+  }
+
+  /* Streak flame, pulsed once when the streak is alive. */
+  .ts-flame {
+    animation: ts-flame 620ms var(--ease-spring);
+  }
+
+  /* Card hover: lift plus a shadow that grows with it, rather than a flat
+     colour change. */
+  .ts-lift {
+    transition:
+      transform var(--duration-normal) var(--ease-out-quart),
+      box-shadow var(--duration-normal) var(--ease-out-quart),
+      border-color var(--duration-normal) var(--ease-out-quart);
+  }
+
+  .ts-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/* Reduced motion: the block at the top of this file already zeroes durations,
+   but these two need their transform reset explicitly or the element would be
+   frozen mid-animation at a displaced position. */
+@media (prefers-reduced-motion: reduce) {
+  .ts-pop,
+  .ts-shake,
+  .ts-rise,
+  .ts-flame,
+  .ts-stagger > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .ts-sweep::after {
+    display: none;
+  }
+
+  .ts-lift:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,69 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import { breadcrumbSchema } from '@/seo/jsonld';
+import { t } from '@/i18n/translations';
+import type { BreadcrumbItem } from '@/types/seo';
+
+const locale = 'en' as const;
+
+const title = 'About Typing Studio — Why It Works This Way';
+const description =
+  'A free typing platform with no accounts, no tracking and no backend. Here is the reasoning behind those constraints.';
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: 'About' },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey="about"
+  locale={locale}
+  schemas={[breadcrumbSchema(breadcrumbs)]}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <article class="prose-ts mx-auto max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold text-fg">About Typing Studio</h1>
+    <p class="mt-4 text-lg">
+      Typing Studio is a typing test and practice platform that runs entirely in your browser.
+      No account, no subscription, no data leaving your device.
+    </p>
+
+    <h2>Why no accounts</h2>
+    <p>
+      Typing practice generates a detailed record of how you use a keyboard. That is more
+      personal than it first appears, and there is no technical reason it needs to sit on
+      someone else's server. Storing results locally removes the question entirely: there is no
+      breach to worry about, because there is nothing centralised to breach.
+    </p>
+    <p>
+      The trade-off is real and worth stating plainly. Your history does not follow you between
+      devices, and clearing your browser data erases it. We think that is the right exchange for
+      a practice tool, but it is an exchange.
+    </p>
+
+    <h2>How the measurements work</h2>
+    <p>
+      Words per minute uses the standard convention of five characters per word, including
+      spaces, which is what makes scores comparable across languages and platforms. Net WPM
+      counts only correctly typed characters, so accuracy is built into the headline number
+      rather than reported beside it.
+    </p>
+    <p>
+      Consistency is derived from the variation in your speed second by second. A high score
+      means a steady rhythm; a low one means bursts and stalls. It is often more informative
+      than peak speed, because rhythm is what survives fatigue over a working day.
+    </p>
+
+    <h2>Offline by default</h2>
+    <p>
+      The site is a progressive web app. Once loaded, tests and lessons keep working with no
+      network connection, and it can be installed to a home screen like a native application.
+      Since nothing needs a server, offline is the normal case rather than a degraded one.
+    </p>
+  </article>
+</BaseLayout>

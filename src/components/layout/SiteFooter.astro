@@ -1,0 +1,109 @@
+---
+/**
+ * Site footer.
+ *
+ * Doubles as the site-wide internal link hub: every major section is reachable
+ * from every page, which distributes crawl equity and guarantees no orphans.
+ */
+import { localizedPath, type Locale } from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+import { SITE_NAME } from '@/constants/site';
+import { LANDING_PAGES } from '@/data/pages';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const testPages = LANDING_PAGES.filter((page) => page.group === 'test');
+const practicePages = LANDING_PAGES.filter((page) => page.group === 'practice');
+
+const columns = [
+  {
+    heading: t(locale, 'nav.typingTest'),
+    links: testPages.map((page) => ({
+      label: page.content[locale].h1,
+      routeKey: page.key,
+    })),
+  },
+  {
+    heading: t(locale, 'nav.programming'),
+    links: practicePages.map((page) => ({
+      label: page.content[locale].h1,
+      routeKey: page.key,
+    })),
+  },
+  {
+    heading: t(locale, 'nav.statistics'),
+    links: [
+      { label: t(locale, 'nav.lessons'), routeKey: 'typing-lessons' },
+      { label: t(locale, 'nav.games'), routeKey: 'typing-games' },
+      { label: t(locale, 'stats.title'), routeKey: 'statistics' },
+      { label: t(locale, 'stats.history'), routeKey: 'history' },
+    ],
+  },
+  {
+    heading: t(locale, 'nav.blog'),
+    links: [
+      { label: t(locale, 'nav.blog'), routeKey: 'blog' },
+      { label: t(locale, 'common.search'), routeKey: 'search' },
+    ],
+  },
+] as const;
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-auto border-t border-border bg-surface-sunken">
+  <div class="container-page py-12">
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        columns.map((column) => (
+          <nav aria-labelledby={`footer-${column.heading}`}>
+            <h2
+              id={`footer-${column.heading}`}
+              class="text-xs font-semibold uppercase tracking-wider text-fg-subtle"
+            >
+              {column.heading}
+            </h2>
+            <ul class="mt-4 flex flex-col gap-2.5">
+              {column.links.map((link) => (
+                <li>
+                  <a
+                    href={localizedPath(locale, link.routeKey)}
+                    class="text-sm text-fg-muted transition-colors hover:text-fg"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))
+      }
+    </div>
+
+    <div
+      class="mt-10 flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p class="text-sm text-fg-subtle">
+        &copy; {year} {SITE_NAME}
+      </p>
+      <ul class="flex items-center gap-5">
+        <li>
+          <a
+            href={localizedPath(locale, 'about')}
+            class="text-sm text-fg-muted transition-colors hover:text-fg">About</a
+          >
+        </li>
+        <li>
+          <a
+            href={localizedPath(locale, 'privacy')}
+            class="text-sm text-fg-muted transition-colors hover:text-fg">Privacy</a
+          >
+        </li>
+      </ul>
+    </div>
+  </div>
+</footer>

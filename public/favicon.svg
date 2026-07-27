@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Typing Studio">
+  <title>Typing Studio</title>
+  <!--
+    A keycap with a typing caret on it.
+
+    The subject of this product is a key being pressed, so the mark is the
+    object itself rather than a monogram: a keycap reads as "typing" at 16px in
+    a browser tab, where letterforms blur into an unreadable smudge.
+
+    Colours are the ember-400 and neutral-1000 design tokens as hex — a favicon
+    renders with no access to CSS custom properties. Keep in sync with
+    src/styles/global.css.
+  -->
+  <rect width="128" height="128" rx="28" fill="#0a0d16" />
+
+  <!-- Keycap body, with a lighter top face so it reads as a physical key
+       rather than a flat square. -->
+  <rect x="24" y="26" width="80" height="76" rx="14" fill="#ff8a3d" />
+  <rect x="24" y="26" width="80" height="60" rx="14" fill="#ffa866" />
+
+  <!-- The caret: the one element that says "text is being typed here". -->
+  <rect x="61" y="40" width="6" height="37" rx="3" fill="#0a0d16" />
+
+  <!-- Baseline under the caret, as in a text field. -->
+  <rect x="46" y="77" width="36" height="6" rx="3" fill="#0a0d16" opacity="0.75" />
+</svg>

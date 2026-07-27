@@ -1,0 +1,67 @@
+---
+/**
+ * The single HTML shell for every page.
+ *
+ * Owns: document structure, landmarks, skip link, head assembly, global JSON-LD
+ * (Organization + WebSite, emitted once site-wide via @id references) and the
+ * AdSense loader. Page-specific schema is passed in via `schemas`.
+ */
+import { ClientRouter } from 'astro:transitions';
+
+import Seo from '@/components/seo/Seo.astro';
+import JsonLd from '@/components/seo/JsonLd.astro';
+import ThemeScript from '@/components/ThemeScript.astro';
+import ServiceWorker from '@/components/ServiceWorker.astro';
+import AdSenseLoader from '@/components/ads/AdSenseLoader.astro';
+import SiteHeader from '@/components/layout/SiteHeader.astro';
+import SiteFooter from '@/components/layout/SiteFooter.astro';
+
+import { organizationSchema, webSiteSchema } from '@/seo/jsonld';
+import { LOCALE_TAGS } from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+import type { JsonLdDocument, SeoMeta } from '@/types/seo';
+
+import '@/styles/global.css';
+
+interface Props extends SeoMeta {
+  /** Page-level structured data (Breadcrumb, FAQ, WebApplication, …). */
+  schemas?: readonly JsonLdDocument[];
+  /** Constrains <main>; set false for full-bleed pages. */
+  contained?: boolean;
+  bodyClass?: string;
+}
+
+const { schemas = [], contained = true, bodyClass = '', ...seo } = Astro.props;
+const { locale } = seo;
+
+const globalSchemas: JsonLdDocument[] = [organizationSchema(), webSiteSchema(locale)];
+---
+
+<!doctype html>
+<html lang={LOCALE_TAGS[locale]} data-locale={locale}>
+  <head>
+    <ThemeScript />
+    <Seo {...seo} />
+    <JsonLd schema={[...globalSchemas, ...schemas]} />
+    <AdSenseLoader />
+    <ClientRouter />
+  </head>
+
+  <body class:list={['min-h-svh flex flex-col bg-canvas text-fg', bodyClass]}>
+    <a
+      href="#main"
+      class="sr-only-focusable z-100 top-3 left-3 rounded-md bg-accent px-4 py-2 font-medium text-accent-fg shadow-lg"
+    >
+      {t(locale, 'a11y.skipToContent')}
+    </a>
+
+    <SiteHeader locale={locale} />
+
+    <main id="main" class:list={['flex-1', contained && 'container-page py-section']}>
+      <slot />
+    </main>
+
+    <SiteFooter locale={locale} />
+    <ServiceWorker />
+  </body>
+</html>

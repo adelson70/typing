@@ -1,0 +1,33 @@
+---
+/**
+ * Content + advertising sidebar layout.
+ *
+ * A CSS grid whose second column only exists at `xl`. Below that the grid is a
+ * single column and the sidebar is not rendered at all, so no space is
+ * reserved and nothing collapses.
+ *
+ * Deliberately grid rather than flex: `minmax(0, 1fr)` lets long code blocks
+ * and tables in the main column scroll internally instead of forcing the whole
+ * page to scroll sideways.
+ */
+import AdSidebar from '@/components/ads/AdSidebar.astro';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div
+  class:list={[
+    'grid gap-8 xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-10',
+    className,
+  ]}
+>
+  <div class="min-w-0">
+    <slot />
+  </div>
+
+  <AdSidebar />
+</div>

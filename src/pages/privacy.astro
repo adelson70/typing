@@ -1,0 +1,107 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import { breadcrumbSchema } from '@/seo/jsonld';
+import { t } from '@/i18n/translations';
+import { ADSENSE_CLIENT_ID } from '@/constants/site';
+import type { BreadcrumbItem } from '@/types/seo';
+
+const locale = 'en' as const;
+
+const title = 'Privacy Policy — What We Store and Where';
+const description =
+  'Typing Studio has no backend and no accounts. Your typing data stays in your browser. Here is exactly what that means.';
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: 'Privacy' },
+];
+
+// Advertising is the only third party that could ever process visitor data, so
+// the disclosure is conditional on it actually being enabled.
+const adsEnabled = ADSENSE_CLIENT_ID.length > 0;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey="privacy"
+  locale={locale}
+  schemas={[breadcrumbSchema(breadcrumbs)]}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <article class="prose-ts mx-auto max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold text-fg">Privacy Policy</h1>
+    <p class="mt-4 text-lg">
+      Typing Studio is built so that your typing data never leaves your device. This is a
+      property of the architecture, not a promise about how we behave with a database — there
+      is no database.
+    </p>
+
+    <h2>What we store</h2>
+    <p>
+      Your test results, settings, achievements and practice history are written to your
+      browser's own storage: <code>localStorage</code> for preferences and
+      <code>IndexedDB</code> for history. None of it is transmitted to a server, because the
+      site has no server component. Clearing your browser data for this site deletes all of it
+      permanently, and we cannot recover it.
+    </p>
+
+    <h2>What we do not collect</h2>
+    <p>
+      No accounts, no email addresses, no passwords, no keystroke logs, and no analytics
+      profile tied to you. The site is delivered as static files, so there is no application
+      layer that could record a request beyond the standard access logs kept by whichever CDN
+      serves the files.
+    </p>
+
+    {
+      adsEnabled && (
+        <>
+          <h2>Advertising</h2>
+          <p>
+            This site displays advertising through Google AdSense, which is the one third
+            party that receives any data about your visit. Google may use cookies or similar
+            technologies to serve and measure ads, and may personalise them based on your prior
+            visits to this and other sites.
+          </p>
+          <p>
+            You can control or disable personalised advertising through{' '}
+            <a
+              href="https://myadcenter.google.com/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Google My Ad Center
+            </a>
+            . Ad-related data is handled under{' '}
+            <a
+              href="https://policies.google.com/technologies/partner-sites"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Google's privacy policy
+            </a>
+            , not ours — we never receive your typing data through it, because it is never sent
+            anywhere for the ad system to see.
+          </p>
+        </>
+      )
+    }
+
+    <h2>Your data, your device</h2>
+    <p>
+      Because everything is local, exporting or deleting your data is entirely under your
+      control. Browser settings for this site can clear it at any time, and using a different
+      browser or device simply means starting fresh — there is no sync, by design.
+    </p>
+
+    <h2>Changes</h2>
+    <p>
+      If this policy changes in a way that affects what is stored or who receives it, the
+      change will be described here rather than announced by email — we do not have your email
+      address.
+    </p>
+  </article>
+</BaseLayout>

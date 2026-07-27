@@ -1,0 +1,63 @@
+---
+/**
+ * A reserved advertising placement.
+ *
+ * With auto ads, Google injects units into the page. Left alone it pushes
+ * content down and wrecks CLS. This component reserves a fixed min-height per
+ * placement so the space already exists when the ad arrives — the slot is
+ * simply blank until fill, and never reflows.
+ *
+ * The `data-ts-ad-slot` attribute marks intentional placements so auto-ads
+ * behaviour can be tuned in the AdSense console without code changes.
+ */
+import { ADSENSE_CLIENT_ID } from '@/constants/site';
+
+type Placement = 'leaderboard' | 'in-article' | 'sidebar';
+
+interface Props {
+  placement: Placement;
+  class?: string;
+  /** Hide below `md`, where a large unit would dominate a phone screen. */
+  desktopOnly?: boolean;
+}
+
+const { placement, class: className = '', desktopOnly = false } = Astro.props;
+
+const enabled = ADSENSE_CLIENT_ID.length > 0;
+
+/**
+ * Reserved heights mirror the standard AdSense responsive units.
+ * Mobile leaderboards are 100px; desktop 90px banners sit inside 120px.
+ */
+const RESERVED: Record<Placement, string> = {
+  leaderboard: 'min-h-[100px] md:min-h-[120px]',
+  'in-article': 'min-h-[280px]',
+  sidebar: 'min-h-[600px]',
+};
+---
+
+{
+  enabled && (
+    <aside
+      data-ts-ad-slot={placement}
+      aria-label="Advertisement"
+      class:list={[
+        'ts-ad-slot w-full overflow-hidden',
+        RESERVED[placement],
+        desktopOnly && 'hidden md:block',
+        className,
+      ]}
+    >
+      <ins
+        class="adsbygoogle block w-full"
+        style="display:block"
+        data-ad-client={ADSENSE_CLIENT_ID}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+      <script is:inline>
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </aside>
+  )
+}

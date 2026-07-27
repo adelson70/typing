@@ -1,0 +1,30 @@
+---
+/**
+ * Google AdSense auto-ads loader.
+ *
+ * Auto ads are configured account-side, so the page only needs to load the
+ * script — no per-slot `<ins>` markup is required. Two deliberate choices:
+ *
+ * 1. `async` + no `defer`: AdSense must run its own placement pass; deferring
+ *    it past DOMContentLoaded measurably delays fill without helping LCP.
+ * 2. Rendered only when a client ID is configured, so development and preview
+ *    builds emit no ad markup at all.
+ *
+ * Layout shift is handled by `<AdSlot>`, which reserves space up front.
+ */
+import { ADSENSE_CLIENT_ID } from '@/constants/site';
+
+const enabled = ADSENSE_CLIENT_ID.length > 0;
+const src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`;
+---
+
+{
+  enabled && (
+    <>
+      {/* Shave a round trip off the ad request without blocking render. */}
+      <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
+      <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net" />
+      <script async src={src} crossorigin="anonymous" is:inline />
+    </>
+  )
+}

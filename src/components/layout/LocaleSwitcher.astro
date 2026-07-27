@@ -1,0 +1,73 @@
+---
+/**
+ * Language switcher.
+ *
+ * Links to the *same page* in the other locale by reusing the current route
+ * key, rather than dumping the user on the homepage — which is both better UX
+ * and what makes the hreflang pairing honest.
+ */
+import {
+  LOCALES,
+  LOCALE_NAMES,
+  LOCALE_TAGS,
+  localizedPath,
+  routeKeyFromPath,
+  type Locale,
+} from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const routeKey = routeKeyFromPath(Astro.url.pathname);
+---
+
+<details class="group relative">
+  <summary
+    class="grid h-10 cursor-pointer list-none place-items-center gap-1 rounded-md px-2 text-sm font-medium text-fg-muted transition-colors duration-fast hover:bg-surface-raised hover:text-fg [&::-webkit-details-marker]:hidden"
+    aria-label={t(locale, 'a11y.selectLanguage')}
+  >
+    <span class="flex items-center gap-1.5">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"></path>
+      </svg>
+      <span class="uppercase">{locale === 'pt-br' ? 'PT' : 'EN'}</span>
+    </span>
+  </summary>
+
+  <ul
+    class="absolute right-0 top-12 z-50 w-40 rounded-xl border border-border bg-surface p-1.5 shadow-lg"
+  >
+    {
+      LOCALES.map((alt) => (
+        <li>
+          <a
+            href={localizedPath(alt, routeKey)}
+            hreflang={LOCALE_TAGS[alt]}
+            lang={LOCALE_TAGS[alt]}
+            class:list={[
+              'block rounded-md px-3 py-2 text-sm transition-colors',
+              alt === locale
+                ? 'bg-surface-raised font-medium text-fg'
+                : 'text-fg-muted hover:bg-surface-raised hover:text-fg',
+            ]}
+            aria-current={alt === locale ? 'true' : undefined}
+          >
+            {LOCALE_NAMES[alt]}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</details>

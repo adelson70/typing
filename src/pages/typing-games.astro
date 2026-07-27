@@ -1,0 +1,143 @@
+---
+/**
+ * The games hub.
+ *
+ * Two sections: the real games, and the timed challenges that were here before.
+ * The challenges are kept rather than replaced — they are existing SEO value,
+ * and "a test with a countdown" is genuinely what some visitors mean by a
+ * typing game.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import Card from '@/components/ui/Card.astro';
+import FaqSection from '@/components/content/FaqSection.astro';
+import RelatedLinks from '@/components/content/RelatedLinks.astro';
+import { GAME_PAGES } from '@/features/games/data/gamePages';
+import { breadcrumbSchema, collectionPageSchema, faqSchema } from '@/seo/jsonld';
+import { t } from '@/i18n/translations';
+import { localizedPath } from '@/constants/i18n';
+import { LANDING_PAGES } from '@/data/pages';
+import type { BreadcrumbItem, FaqItem } from '@/types/seo';
+
+const locale = 'en' as const;
+
+const title = 'Typing Games — Practice That Feels Like Play';
+const description =
+  'Typing challenges built around real practice principles: immediate feedback, targeted repetition and difficulty that scales with you.';
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'nav.games') },
+];
+
+// Timed challenges are practice pages with a competitive framing rather than
+// separate engines — the same measurement logic, different presentation.
+const challenges = LANDING_PAGES.filter((page) =>
+  ['daily-challenge', 'typing-test-1-minute', 'numbers-typing', 'symbols-typing'].includes(page.key),
+);
+
+const faq: readonly FaqItem[] = [
+  {
+    question: 'Do typing games actually improve your speed?',
+    answer:
+      'Some do. The ones that help share three properties: immediate feedback on every keystroke, difficulty that tracks your current ability, and high repetition of the patterns you are weakest at. Games heavy on reading and light on typing mostly pass time.',
+  },
+  {
+    question: 'Are games better than structured lessons?',
+    answer:
+      'They are better at keeping you coming back, which matters more than most people expect — frequency drives motor learning. For fixing a specific weakness, focused drilling is far more efficient.',
+  },
+  {
+    question: 'Do game scores affect my typing statistics?',
+    answer:
+      'No. Games earn XP, unlock achievements and keep your daily streak alive, but their results are stored separately from your test history. The average WPM on your statistics page reflects real tests only, so an evening of Word Rain never rewrites it.',
+  },
+  {
+    question: 'Do I need an account to save progress?',
+    answer:
+      'No. Scores and streaks are stored in your own browser, with no account and no server involved.',
+  },
+];
+
+const schemas = [
+  collectionPageSchema({
+    name: title,
+    description,
+    routeKey: 'typing-games',
+    locale,
+    items: [
+      ...GAME_PAGES.map((game) => ({
+        name: game.content[locale].h1,
+        path: localizedPath(locale, game.routeKey),
+      })),
+      ...challenges.map((page) => ({
+        name: page.content[locale].h1,
+        path: localizedPath(locale, page.key),
+      })),
+    ],
+  }),
+  breadcrumbSchema(breadcrumbs),
+  faqSchema(faq),
+];
+
+const related = LANDING_PAGES.filter((page) =>
+  ['typing-test', 'programming-typing', 'typing-test-5-minutes'].includes(page.key),
+).map((page) => ({
+  title: page.content[locale].h1,
+  description: page.content[locale].description,
+  routeKey: page.key,
+}));
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey="typing-games"
+  locale={locale}
+  keywords={['typing games', 'typing challenge', 'fun typing practice']}
+  schemas={schemas}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold">{t(locale, 'nav.games')}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{description}</p>
+  </header>
+
+  <h2 class="mt-12 text-2xl font-semibold">{t(locale, 'game.allGames')}</h2>
+  <ul class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      GAME_PAGES.map((game) => (
+        <li>
+          <Card href={localizedPath(locale, game.routeKey)} padding="md" class="h-full">
+            <span class="text-3xl" aria-hidden="true">
+              {game.icon}
+            </span>
+            <h3 class="mt-3 font-medium text-fg">{game.content[locale].h1}</h3>
+            <p class="mt-2 text-sm text-fg-muted">{game.content[locale].description}</p>
+          </Card>
+        </li>
+      ))
+    }
+  </ul>
+
+  <h2 class="mt-14 text-2xl font-semibold">{t(locale, 'game.timedChallenges')}</h2>
+  <ul class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      challenges.map((page) => (
+        <li>
+          <Card href={localizedPath(locale, page.key)} padding="md" class="h-full">
+            <h3 class="font-medium text-fg">{page.content[locale].h1}</h3>
+            <p class="mt-2 text-sm text-fg-muted">{page.content[locale].description}</p>
+          </Card>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="mx-auto max-w-(--container-prose)">
+    <FaqSection items={faq} locale={locale} />
+  </div>
+
+  <RelatedLinks heading={t(locale, 'common.relatedPages')} links={related} locale={locale} />
+</BaseLayout>

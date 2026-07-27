@@ -1,0 +1,145 @@
+---
+/**
+ * Programmatic landing pages.
+ *
+ * One template renders every tool page in every locale from the registry in
+ * `src/data/pages.ts`. Adding a page is a data change, never a routing change —
+ * this is the mechanism that lets the site reach hundreds of pages without any
+ * architectural change.
+ *
+ * The catch-all pattern sits at the lowest routing priority in Astro, so
+ * explicit routes (`/blog/…`, `/statistics`) always win over it.
+ */
+import type { GetStaticPaths } from 'astro';
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import FaqSection from '@/components/content/FaqSection.astro';
+import RelatedLinks from '@/components/content/RelatedLinks.astro';
+import AdSlot from '@/components/ads/AdSlot.astro';
+import { TypingArena } from '@/features/typing/components/TypingArena';
+import { CodeArena } from '@/features/typing/components/CodeArena';
+import type { SnippetLanguage } from '@/features/typing/data/snippets';
+
+import { LANDING_PAGES, getRelatedPages, type LandingPage } from '@/data/pages';
+import { LOCALES, DEFAULT_LOCALE, localizedPath, type Locale } from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+import { breadcrumbSchema, faqSchema, webApplicationSchema } from '@/seo/jsonld';
+import { dailySeed } from '@/features/typing/domain/generator';
+import type { BreadcrumbItem, JsonLdDocument } from '@/types/seo';
+
+interface Props {
+  page: LandingPage;
+  locale: Locale;
+}
+
+export const getStaticPaths: GetStaticPaths = () =>
+  LOCALES.flatMap((locale) =>
+    LANDING_PAGES.map((page) => ({
+      // The default locale is unprefixed; others carry their locale segment.
+      params: {
+        page: locale === DEFAULT_LOCALE ? page.key : `${locale}/${page.key}`,
+      },
+      props: { page, locale },
+    })),
+  );
+
+const { page, locale } = Astro.props;
+const content = page.content[locale];
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: content.h1 },
+];
+
+// The daily challenge must produce an identical prompt for every visitor.
+const seed = page.key === 'daily-challenge' ? dailySeed() : undefined;
+
+// Sources that map onto a structured-code language use the block arena.
+const CODE_LANGUAGES = ['javascript', 'python', 'sql', 'html', 'css'] as const;
+const codeLanguage = (CODE_LANGUAGES as readonly string[]).includes(page.sourceId)
+  ? (page.sourceId as SnippetLanguage)
+  : null;
+
+const relatedPages = getRelatedPages(page).map((related) => ({
+  title: related.content[locale].h1,
+  description: related.content[locale].description,
+  routeKey: related.key,
+}));
+
+const schemas: readonly JsonLdDocument[] = [
+  webApplicationSchema({
+    name: content.h1,
+    description: content.description,
+    routeKey: localizedPath(locale, page.key).replace(/^\/|\/$/g, ''),
+    locale,
+  }),
+  breadcrumbSchema(breadcrumbs),
+  faqSchema(content.faq),
+];
+---
+
+<BaseLayout
+  title={content.title}
+  description={content.description}
+  routeKey={page.key}
+  locale={locale}
+  keywords={content.keywords}
+  schemas={schemas}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="mx-auto max-w-(--container-arena) text-center">
+    <h1 class="text-4xl font-bold">{content.h1}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{content.intro}</p>
+  </header>
+
+  {/* The tool itself: the only hydrated island on the page. `client:load`
+      rather than `client:visible` because it sits above the fold and is the
+      page's entire purpose — deferring it would delay the primary action.
+
+      Code modes get the block arena, which has real indentation and line
+      structure; prose modes get the single-line tape. Indentation only means
+      anything when there are lines to indent relative to, so one layout cannot
+      serve both. */}
+  <div class="mx-auto mt-10 max-w-(--container-arena)">
+    {
+      codeLanguage ? (
+        <CodeArena client:load locale={locale} language={codeLanguage} seed={seed} />
+      ) : (
+        <TypingArena
+          client:load
+          locale={locale}
+          mode={page.mode}
+          limit={page.limit}
+          sourceId={page.sourceId}
+          seed={seed}
+        />
+      )
+    }
+  </div>
+
+  <AdSlot placement="leaderboard" class="mx-auto mt-10 max-w-(--container-arena)" />
+
+  {/* Editorial content: what makes the page rank rather than merely function. */}
+  <article class="prose-ts mx-auto mt-section max-w-(--container-prose)">
+    {
+      content.sections.map((section) => (
+        <section class="mt-8 first:mt-0">
+          <h2 class="text-2xl font-semibold">{section.heading}</h2>
+          <p class="mt-3 text-fg-muted">{section.body}</p>
+        </section>
+      ))
+    }
+  </article>
+
+  <div class="mx-auto max-w-(--container-prose)">
+    <FaqSection items={content.faq} locale={locale} />
+  </div>
+
+  <RelatedLinks
+    heading={t(locale, 'common.relatedPages')}
+    links={relatedPages}
+    locale={locale}
+  />
+</BaseLayout>

@@ -1,0 +1,118 @@
+---
+/**
+ * Lesson index.
+ *
+ * Lessons are ordered practice units backed by the same engine as the tests;
+ * each links into a practice mode with a fixed source and target.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/layout/Breadcrumbs.astro';
+import Card from '@/components/ui/Card.astro';
+import FaqSection from '@/components/content/FaqSection.astro';
+import RelatedLinks from '@/components/content/RelatedLinks.astro';
+
+import { breadcrumbSchema, collectionPageSchema, faqSchema } from '@/seo/jsonld';
+import { t } from '@/i18n/translations';
+import { localizedPath } from '@/constants/i18n';
+import { LESSONS } from '@/data/lessons';
+import { LANDING_PAGES } from '@/data/pages';
+import type { BreadcrumbItem, FaqItem } from '@/types/seo';
+
+const locale = 'en' as const;
+
+const title = 'Typing Lessons — Structured Practice From Home Row Up';
+const description =
+  'Free typing lessons that build from the home row to full keyboard fluency, with accuracy targets at every stage.';
+
+const breadcrumbs: readonly BreadcrumbItem[] = [
+  { name: t(locale, 'nav.home'), path: '' },
+  { name: t(locale, 'nav.lessons') },
+];
+
+const faq: readonly FaqItem[] = [
+  {
+    question: 'In what order should I do the lessons?',
+    answer:
+      'Work through them in sequence. Each lesson assumes the keys taught before it, and the ordering follows finger strength and reach difficulty rather than the alphabet.',
+  },
+  {
+    question: 'How long should each lesson take?',
+    answer:
+      'Ten to fifteen minutes is ideal. Motor learning responds far better to short daily sessions than to occasional long ones, and accuracy degrades noticeably after about twenty minutes.',
+  },
+  {
+    question: 'When should I move to the next lesson?',
+    answer:
+      'When you can complete the current one at 97% accuracy without looking at the keyboard. Speed comes later — moving on before accuracy is solid builds errors into the foundation.',
+  },
+  {
+    question: 'Do I need to finish the lessons before taking a test?',
+    answer:
+      'No. Taking a test early gives you a useful baseline. Just avoid judging progress by test scores during the first weeks, when technique changes make you temporarily slower.',
+  },
+];
+
+const schemas = [
+  collectionPageSchema({
+    name: title,
+    description,
+    routeKey: 'typing-lessons',
+    locale,
+    items: LESSONS.map((lesson) => ({
+      name: lesson.content[locale].title,
+      path: localizedPath(locale, lesson.practiceRoute),
+    })),
+  }),
+  breadcrumbSchema(breadcrumbs),
+  faqSchema(faq),
+];
+
+const related = LANDING_PAGES.filter((page) =>
+  ['typing-test', 'numbers-typing', 'symbols-typing'].includes(page.key),
+).map((page) => ({
+  title: page.content[locale].h1,
+  description: page.content[locale].description,
+  routeKey: page.key,
+}));
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  routeKey="typing-lessons"
+  locale={locale}
+  keywords={['typing lessons', 'learn touch typing', 'typing course', 'home row']}
+  schemas={schemas}
+>
+  <Breadcrumbs items={breadcrumbs} locale={locale} />
+
+  <header class="max-w-(--container-prose)">
+    <h1 class="text-4xl font-bold">{t(locale, 'nav.lessons')}</h1>
+    <p class="mt-4 text-lg text-fg-muted">{description}</p>
+  </header>
+
+  <ol class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      LESSONS.map((lesson, index) => (
+        <li>
+          <Card href={localizedPath(locale, lesson.practiceRoute)} padding="md" class="h-full">
+            <div class="flex items-center gap-3">
+              <span class="grid size-8 shrink-0 place-items-center rounded-md bg-surface-raised font-mono text-sm text-fg-muted">
+                {index + 1}
+              </span>
+              <h2 class="font-medium text-fg">{lesson.content[locale].title}</h2>
+            </div>
+            <p class="mt-3 text-sm text-fg-muted">{lesson.content[locale].description}</p>
+            <p class="mt-4 font-mono text-xs text-fg-subtle">{lesson.keys}</p>
+          </Card>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="mx-auto max-w-(--container-prose)">
+    <FaqSection items={faq} locale={locale} />
+  </div>
+
+  <RelatedLinks heading={t(locale, 'common.relatedPages')} links={related} locale={locale} />
+</BaseLayout>

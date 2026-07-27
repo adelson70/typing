@@ -1,0 +1,9 @@
+# Cloudflare Pages — static Astro build (no Workers adapter).
+# https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+#
+# The `name` must match your Pages project slug in the dashboard when using
+# `pnpm pages:deploy`. Git-connected projects also read `pages_build_output_dir`.
+
+name = "typing"
+pages_build_output_dir = "./dist"
+compatibility_date = "2025-05-15"
