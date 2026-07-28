@@ -8,6 +8,7 @@
 # Legacy paths emitted by @astrojs/sitemap before finalize-sitemap.mjs runs locally
 /sitemap-index.xml /sitemap.xml 301
 /sitemap-0.xml /sitemap.xml 301
-
-# Wrong hostname (typings → typing). Attach both domains to the Worker if needed.
-https://typings.abjr.dev/* https://typing.abjr.dev/:splat 301!
+#
+# Workers _redirects only allows relative paths (no https:// host rules).
+# To redirect typings.abjr.dev → typing.abjr.dev, use Cloudflare Redirect Rules
+# in the dashboard (see DEPLOY.md).

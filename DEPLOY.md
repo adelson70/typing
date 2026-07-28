@@ -47,6 +47,6 @@ Canônico: **`https://typing.abjr.dev`** (`SITE_URL` / `SITE_HOST` em `src/const
 
 No dashboard da Cloudflare, o domínio customizado deve ser **`typing.abjr.dev`** — **não** `typings.abjr.dev`.
 
-Se `typings.abjr.dev` também estiver no Worker, o `public/_redirects` envia `301` para `typing.abjr.dev`. O ideal é remover o hostname errado e manter só o canônico.
+Redirecionar `typings.abjr.dev` → `typing.abjr.dev` **não** pode ir em `public/_redirects` (o Workers só aceita URLs relativas). Use **Rules → Redirect Rules** (ou remova o hostname errado em **Domains & Routes**).
 
 Após o deploy, envie `https://typing.abjr.dev/sitemap.xml` no Search Console.
