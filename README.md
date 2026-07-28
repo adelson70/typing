@@ -33,22 +33,22 @@ The production domain and AdSense publisher ID live in **`src/constants/site.ts`
 
 The only outstanding item is assets: real icons in `public/icons/` (`icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`), a `public/favicon.svg` and `public/favicon.ico`, and an Open Graph image at `public/og/default.png` (1200×630).
 
-## Deploying to Cloudflare (Workers + static assets)
+## Deploying to Cloudflare Pages
 
-Same pattern as **qrcodehub**: `astro build` → `dist/`, then `wrangler deploy` uploads assets (see `wrangler.jsonc`). No SSR adapter.
+`astro build` → `dist/`, then `wrangler pages deploy dist` (see `wrangler.toml`). No SSR adapter.
 
 | Setting | Value |
 |---|---|
 | Build command | `pnpm run build` |
-| Deploy command | `pnpm exec wrangler deploy` or `npx wrangler deploy` |
-| Worker name | Must match `name` in `wrangler.jsonc` (`typing`) |
+| Deploy command | `pnpm run deploy` or `npx wrangler pages deploy dist` |
+| Pages project name | Must match `name` in `wrangler.toml` (`typing`) |
 | Node.js | **22** (`.nvmrc` / `.node-version`) |
 
-There is no separate “build output directory” in the dashboard — `wrangler.jsonc` points at `./dist`.
+Output directory is `./dist` (`pages_build_output_dir` in `wrangler.toml`).
 
 Details and checklist: [DEPLOY.md](./DEPLOY.md).
 
-**Local preview with `_headers`:** `pnpm build && pnpm preview:cf` (`wrangler dev`).
+**Local preview with `_headers`:** `pnpm build && pnpm preview:cf` (`wrangler pages dev dist`).
 
 `public/_headers` and `public/_redirects` are copied to the root of `dist/` and applied when served through Wrangler.
 

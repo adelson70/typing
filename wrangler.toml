@@ -1,0 +1,8 @@
+# Cloudflare Pages — static Astro build (no Workers adapter).
+# https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+#
+# `name` must match the Pages project slug in the dashboard.
+
+name = "typing"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-07-24"
