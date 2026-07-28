@@ -57,7 +57,10 @@ export default defineConfig({
         defaultLocale: DEFAULT_LOCALE,
         locales: SITEMAP_LOCALE_MAP,
       },
-      filter: (page) => !page.includes('/internal/') && !page.includes('/404'),
+      filter: (page) =>
+        !page.includes('/internal/') &&
+        !page.includes('/404') &&
+        !page.includes('/offline/'),
       changefreq: 'weekly',
     }),
   ],

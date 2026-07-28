@@ -5,6 +5,6 @@
 # output, and Cloudflare Pages already normalises /page.html -> /page and
 # /page/index.html -> /page/, so no rules are needed for that.
 #
-# Add permanent redirects here when a route is renamed, so existing rankings
-# and inbound links follow the page instead of hitting the 404:
-#   /old-route/ /new-route/ 301
+# Legacy paths emitted by @astrojs/sitemap before finalize-sitemap.mjs runs locally
+/sitemap-index.xml /sitemap.xml 301
+/sitemap-0.xml /sitemap.xml 301

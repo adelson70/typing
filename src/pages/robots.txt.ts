@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-import { SITE_URL } from '@/constants/site';
+import { LLM_TXT_PATH, SITE_URL, SITEMAP_PATH } from '@/constants/site';
 
 /**
  * robots.txt, generated so the sitemap URL can never drift from `SITE_URL`.
@@ -19,8 +19,9 @@ Disallow: /_astro/
 Disallow: /search?
 
 # AI crawlers are permitted; the content is public and freely licensed.
+# Site summary for LLMs: ${SITE_URL}${LLM_TXT_PATH}
 
-Sitemap: ${SITE_URL}/sitemap-index.xml
+Sitemap: ${SITE_URL}${SITEMAP_PATH}
 `;
 
   return new Response(body, {

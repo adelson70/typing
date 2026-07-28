@@ -43,7 +43,7 @@ Connect the repository, then use these settings:
 | Build command | `pnpm run build` |
 | Build output directory | `dist` (also in `wrangler.toml` as `pages_build_output_dir`) |
 | **Deploy command** | **Leave empty** — Pages publishes `dist/` after the build |
-| Node.js | `22.16.0` via `.nvmrc` (matches the Pages v3 build image default) |
+| Node.js | **22** (`.nvmrc`; optional `NODE_VERSION=22` on Pages) |
 | Package manager | pnpm (`pnpm-lock.yaml`; optional pin `PNPM_VERSION=10.33.0` to match `packageManager`) |
 
 No adapter is needed. `@astrojs/cloudflare` is only for SSR; this is a static build, so Cloudflare simply uploads `dist/`.
@@ -58,7 +58,7 @@ No adapter is needed. `@astrojs/cloudflare` is only for SSR; this is a static bu
 
 **`src/pages/404.astro` must not be deleted.** Without a top-level `404.html`, Cloudflare Pages assumes the project is a single-page application and serves the homepage for every unmatched URL — which would produce unbounded duplicate content.
 
-After the first deploy, submit `https://typing.abjr.dev/sitemap-index.xml` to Google Search Console.
+After the first deploy, submit `https://typing.abjr.dev/sitemap.xml` to Google Search Console.
 
 The build is plain static output, so any other host (Netlify, Vercel, S3) also works — only the `_headers` and `_redirects` files are Cloudflare-specific.
 

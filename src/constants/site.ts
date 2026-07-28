@@ -10,6 +10,12 @@
  */
 export const SITE_URL = 'https://typing.abjr.dev' as const;
 
+/** Path of the public sitemap (single urlset, all indexable routes). */
+export const SITEMAP_PATH = '/sitemap.xml' as const;
+
+/** Machine-readable site summary for LLM / AI crawlers. */
+export const LLM_TXT_PATH = '/llm.txt' as const;
+
 export const SITE_NAME = 'Typing Studio' as const;
 
 /** Publisher used by Organization / Article JSON-LD. */

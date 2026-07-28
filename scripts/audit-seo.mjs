@@ -128,16 +128,26 @@ for (const file of files) {
 
 // --- Sitemap and robots -------------------------------------------------
 try {
-  await readFile(join(DIST, 'sitemap-index.xml'), 'utf8');
+  const sitemap = await readFile(join(DIST, 'sitemap.xml'), 'utf8');
+  if (!sitemap.includes('<url>')) failures.push('sitemap.xml has no URL entries');
 } catch {
-  failures.push('sitemap-index.xml was not generated');
+  failures.push('sitemap.xml was not generated');
 }
 
 try {
   const robots = await readFile(join(DIST, 'robots.txt'), 'utf8');
   if (!robots.includes('Sitemap:')) failures.push('robots.txt does not reference the sitemap');
+  if (!robots.includes('/sitemap.xml')) failures.push('robots.txt does not point at /sitemap.xml');
+  if (!robots.includes('/llm.txt')) failures.push('robots.txt does not reference /llm.txt');
 } catch {
   failures.push('robots.txt was not generated');
+}
+
+try {
+  const llm = await readFile(join(DIST, 'llm.txt'), 'utf8');
+  if (!llm.includes('Sitemap:')) failures.push('llm.txt does not reference the sitemap');
+} catch {
+  failures.push('llm.txt was not generated');
 }
 
 // --- Report --------------------------------------------------------------
@@ -156,4 +166,4 @@ if (failures.length > 0) {
 }
 
 console.log(`Passed: unique titles/descriptions/canonicals, single H1, valid JSON-LD,`);
-console.log(`        OG + Twitter tags, lang attributes, sitemap and robots.txt.\n`);
+console.log(`        OG + Twitter tags, lang attributes, sitemap, robots.txt and llm.txt.\n`);
