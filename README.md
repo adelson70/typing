@@ -40,16 +40,19 @@ Connect the repository, then use these settings:
 | Setting | Value |
 |---|---|
 | Framework preset | None (or Astro) |
-| Build command | `pnpm build` |
-| Build output directory | `dist` (also declared in `wrangler.toml` as `pages_build_output_dir`) |
+| Build command | `pnpm run build` |
+| Build output directory | `dist` (also in `wrangler.toml` as `pages_build_output_dir`) |
+| **Deploy command** | **Leave empty** — Pages publishes `dist/` after the build |
 | Node.js | `22.16.0` via `.nvmrc` (matches the Pages v3 build image default) |
 | Package manager | pnpm (`pnpm-lock.yaml`; optional pin `PNPM_VERSION=10.33.0` to match `packageManager`) |
 
 No adapter is needed. `@astrojs/cloudflare` is only for SSR; this is a static build, so Cloudflare simply uploads `dist/`.
 
+**Do not** set the deploy command to `npx wrangler deploy` — that targets Workers, not static Pages, and fails after a successful build. See [DEPLOY.md](./DEPLOY.md).
+
 **Local parity with production headers:** after `pnpm build`, run `pnpm pages:dev` to serve `dist/` through Wrangler (applies `public/_headers` the same way Pages does).
 
-**CLI deploy** (after `wrangler login`): `pnpm build && pnpm pages:deploy` — set the `name` in `wrangler.toml` to your Pages project slug if it differs from `typing`.
+**CLI deploy** (after `wrangler login`): `pnpm build && pnpm deploy` — uses `wrangler pages deploy` and `wrangler.toml`. Set `name` to your Pages project slug if it differs from `typing`.
 
 `public/_headers` and `public/_redirects` are copied to the root of `dist/` and applied automatically. The headers file sets immutable caching on fingerprinted assets, `no-store` on the service worker, and baseline security headers site-wide.
 
