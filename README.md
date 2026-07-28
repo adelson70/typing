@@ -33,34 +33,30 @@ The production domain and AdSense publisher ID live in **`src/constants/site.ts`
 
 The only outstanding item is assets: real icons in `public/icons/` (`icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`), a `public/favicon.svg` and `public/favicon.ico`, and an Open Graph image at `public/og/default.png` (1200×630).
 
-## Deploying to Cloudflare Pages
+## Deploying to Cloudflare (Workers + static assets)
 
-Connect the repository, then use these settings:
+Same pattern as **qrcodehub**: `astro build` → `dist/`, then `wrangler deploy` uploads assets (see `wrangler.jsonc`). No SSR adapter.
 
 | Setting | Value |
 |---|---|
-| Framework preset | None (or Astro) |
 | Build command | `pnpm run build` |
-| Build output directory | `dist` (also in `wrangler.toml` as `pages_build_output_dir`) |
-| **Deploy command** | **Leave empty** — Pages publishes `dist/` after the build |
-| Node.js | **22** (`.nvmrc`; optional `NODE_VERSION=22` on Pages) |
-| Package manager | pnpm (`pnpm-lock.yaml`; optional pin `PNPM_VERSION=10.33.0` to match `packageManager`) |
+| Deploy command | `pnpm exec wrangler deploy` or `npx wrangler deploy` |
+| Worker name | Must match `name` in `wrangler.jsonc` (`typing`) |
+| Node.js | **22** (`.nvmrc` / `.node-version`) |
 
-No adapter is needed. `@astrojs/cloudflare` is only for SSR; this is a static build, so Cloudflare simply uploads `dist/`.
+There is no separate “build output directory” in the dashboard — `wrangler.jsonc` points at `./dist`.
 
-**Do not** set the deploy command to `npx wrangler deploy` — that targets Workers, not static Pages, and fails after a successful build. See [DEPLOY.md](./DEPLOY.md).
+Details and checklist: [DEPLOY.md](./DEPLOY.md).
 
-**Local parity with production headers:** after `pnpm build`, run `pnpm pages:dev` to serve `dist/` through Wrangler (applies `public/_headers` the same way Pages does).
+**Local preview with `_headers`:** `pnpm build && pnpm preview:cf` (`wrangler dev`).
 
-**CLI deploy** (after `wrangler login`): `pnpm build && pnpm deploy` — uses `wrangler pages deploy` and `wrangler.toml`. Set `name` to your Pages project slug if it differs from `typing`.
+`public/_headers` and `public/_redirects` are copied to the root of `dist/` and applied when served through Wrangler.
 
-`public/_headers` and `public/_redirects` are copied to the root of `dist/` and applied automatically. The headers file sets immutable caching on fingerprinted assets, `no-store` on the service worker, and baseline security headers site-wide.
-
-**`src/pages/404.astro` must not be deleted.** Without a top-level `404.html`, Cloudflare Pages assumes the project is a single-page application and serves the homepage for every unmatched URL — which would produce unbounded duplicate content.
+**`src/pages/404.astro` must not be deleted.** Without a top-level `404.html`, unmatched URLs may fall back to the homepage and create duplicate content.
 
 After the first deploy, submit `https://typing.abjr.dev/sitemap.xml` to Google Search Console.
 
-The build is plain static output, so any other host (Netlify, Vercel, S3) also works — only the `_headers` and `_redirects` files are Cloudflare-specific.
+The build is plain static output, so other hosts (Netlify, Vercel, S3) also work — `_headers` and `_redirects` are Cloudflare/Wrangler-oriented.
 
 ## Architecture
 

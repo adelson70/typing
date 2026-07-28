@@ -1,43 +1,48 @@
-# Deploy no Cloudflare Pages
+# Deploy na Cloudflare (Workers + assets estáticos)
 
-Este site é **Astro estático** (`output: 'static'`). O build só gera arquivos em `dist/` — não há Worker.
+Mesmo fluxo do [qrcodehub](https://github.com/adelson70/qrcodehub): site Astro 100% estático, `dist/` publicado como **assets** de um Worker, **sem** script Worker nem adapter SSR.
 
-## Conexão Git (recomendado)
-
-Em **Workers & Pages** → seu projeto → **Settings** → **Builds**:
+## Dashboard (Git → Worker)
 
 | Campo | Valor |
 |--------|--------|
 | Build command | `pnpm run build` |
-| Build output directory | `dist` |
-| **Deploy command** | **vazio** |
+| Deploy command | `pnpm exec wrangler deploy` ou `npx wrangler deploy` |
+| Root directory | `/` |
 
-Depois do build, o Pages publica `dist/` automaticamente. **Não** configure deploy command.
+Não há campo “Build output directory”: o caminho está em `wrangler.jsonc` → `assets.directory` = `./dist`.
 
-### Erro comum: `npx wrangler deploy`
+O `name` em `wrangler.jsonc` (`typing`) deve ser **igual** ao nome do Worker no dashboard.
 
-Se o deploy command for `npx wrangler deploy` (ou `wrangler deploy`), o build pode passar e o deploy falhar com algo como:
+Node: `.nvmrc` / `.node-version` com `22`. pnpm: `packageManager` no `package.json`.
 
-> Missing entry-point to Worker script or to assets directory
+## Por que `wrangler deploy` deixava de falhar
 
-Isso acontece porque `wrangler deploy` é para **Cloudflare Workers**, não para publicar um site estático no Pages. Este repositório não define Worker nem bloco `[assets]` para esse fluxo.
+O erro *Missing entry-point to Worker script or to assets directory* aparece quando se roda `wrangler deploy` **sem** `[assets]` no Wrangler. Com `wrangler.jsonc` (como no qrcodehub), o deploy envia `dist/` corretamente.
 
-**Correção:** apague o deploy command no dashboard, ou use apenas `pnpm run deploy` se quiser deploy manual via CLI (veja abaixo) — nunca `wrangler deploy` sem assets/Worker.
+**Não** use `wrangler pages deploy` neste projeto — o pipeline do dashboard é Worker + deploy command, não Pages com output directory vazio.
 
-## Deploy manual pela CLI (opcional)
-
-Útil fora do Git ou para testar:
+## CLI local
 
 ```bash
 pnpm run build
+pnpm exec wrangler login   # uma vez
 pnpm run deploy
 ```
 
-O script `deploy` executa `wrangler pages deploy`, que lê `name` e `pages_build_output_dir` em `wrangler.toml`. Antes: `pnpm exec wrangler login`.
+## Headers e redirects
 
-## Servir `dist/` localmente com headers do Pages
+`public/_headers` e `public/_redirects` vão para `dist/` no build e são aplicados pelo Wrangler. Para testar como em produção:
 
 ```bash
 pnpm run build
-pnpm run pages:dev
+pnpm run preview:cf
 ```
+
+(`astro preview` não aplica `_headers`.)
+
+## Domínio
+
+Canônico: `https://typing.abjr.dev` (`src/constants/site.ts`). Anexe o domínio customizado ao Worker no dashboard.
+
+Após o deploy, envie `https://typing.abjr.dev/sitemap.xml` no Search Console.

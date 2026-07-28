@@ -9,9 +9,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && node scripts/finalize-sitemap.mjs && node scripts/stamp-sw.mjs",
-    "deploy": "wrangler pages deploy",
-    "pages:dev": "wrangler pages dev dist",
-    "pages:deploy": "pnpm run deploy",
+    "deploy": "wrangler deploy",
+    "preview:cf": "wrangler dev",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
