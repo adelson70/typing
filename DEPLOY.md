@@ -43,6 +43,10 @@ pnpm run preview:cf
 
 ## Domínio
 
-Canônico: `https://typing.abjr.dev` (`src/constants/site.ts`). Anexe o domínio customizado ao Worker no dashboard.
+Canônico: **`https://typing.abjr.dev`** (`SITE_URL` / `SITE_HOST` em `src/constants/site.ts`).
+
+No dashboard da Cloudflare, o domínio customizado deve ser **`typing.abjr.dev`** — **não** `typings.abjr.dev`.
+
+Se `typings.abjr.dev` também estiver no Worker, o `public/_redirects` envia `301` para `typing.abjr.dev`. O ideal é remover o hostname errado e manter só o canônico.
 
 Após o deploy, envie `https://typing.abjr.dev/sitemap.xml` no Search Console.

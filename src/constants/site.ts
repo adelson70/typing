@@ -7,8 +7,13 @@
 
 /**
  * Production origin. No trailing slash.
+ *
+ * Canonical host: `typing.abjr.dev` — not `typings.abjr.dev`.
  */
 export const SITE_URL = 'https://typing.abjr.dev' as const;
+
+/** Hostname only (no scheme), for redirects and dashboard checks. */
+export const SITE_HOST = 'typing.abjr.dev' as const;
 
 /** Path of the public sitemap (single urlset, all indexable routes). */
 export const SITEMAP_PATH = '/sitemap.xml' as const;

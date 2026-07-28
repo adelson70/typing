@@ -8,3 +8,6 @@
 # Legacy paths emitted by @astrojs/sitemap before finalize-sitemap.mjs runs locally
 /sitemap-index.xml /sitemap.xml 301
 /sitemap-0.xml /sitemap.xml 301
+
+# Wrong hostname (typings → typing). Attach both domains to the Worker if needed.
+https://typings.abjr.dev/* https://typing.abjr.dev/:splat 301!
