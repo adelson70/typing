@@ -1,20 +1,40 @@
-# Deploy na Cloudflare Pages
+# Deploy na Cloudflare (Workers + assets estáticos)
 
-Site Astro 100% estático: `pnpm run build` gera `dist/`, depois `wrangler pages deploy dist` publica no projeto Pages **typing**.
+Mesmo fluxo do [qrcodehub](https://github.com/adelson70/qrcodehub) e **flags**: site Astro 100% estático, `dist/` publicado como **assets** de um **Worker**, sem adapter SSR.
 
-## Dashboard (Git → Pages)
+## Por que o typing “não funcionava” e os outros sim
+
+| Projeto | Tipo no dashboard Cloudflare | Deploy |
+|---------|------------------------------|--------|
+| qrcodehub, flags, midiatools | **Worker** (`wrangler deploy`) | `npx wrangler deploy` |
+| typing (antes) | **Pages** (`pages/projects/typing`) | `wrangler deploy` quebrava; `pages deploy` pedia token de Pages |
+
+O repositório do typing chegou a misturar os dois modelos. Os outros **nunca** foram projeto Pages — por isso `wrangler deploy` + `wrangler.jsonc` com `[assets]` funciona lá.
+
+**Este repo segue o modelo Worker.** No dashboard, o Git deve estar em **Workers & Pages → Workers → `typing` → Builds**, não no projeto **Pages** chamado `typing`.
+
+## Dashboard (Git → Worker)
 
 | Campo | Valor |
 |--------|--------|
 | Build command | `pnpm run build` |
-| Deploy command | `pnpm run deploy` ou `npx wrangler pages deploy dist` |
-| Root directory | `/` (vazio) |
+| Deploy command | `pnpm run deploy` ou `npx wrangler deploy` |
+| Root directory | `/` |
 
-O slug do projeto Pages deve ser **`typing`** (igual ao `name` em `wrangler.toml`).
+`assets.directory` = `./dist` em `wrangler.jsonc`. O `name` (`typing`) deve ser **igual** ao nome do **Worker** no dashboard.
 
-**Não** use `npx wrangler deploy` — isso é comando de **Worker**. Em projeto Pages o Wrangler avisa e falha com *Missing entry-point*.
+**Não** use `wrangler pages deploy` neste projeto.
 
-Node: `.nvmrc` / `.node-version` com `22`. pnpm: `packageManager` no `package.json`.
+**Não** use `npx wrangler deploy` num projeto ligado só como **Pages** — o Wrangler avisa e falha.
+
+### Token / auth no CI
+
+Se existir `CLOUDFLARE_API_TOKEN` nas variáveis do build:
+
+- Para **Worker**: permissões **Workers Scripts → Edit** (template “Edit Cloudflare Workers”) costuma bastar.
+- Erro em `/pages/projects/typing` = você estava no fluxo **Pages**; com Worker o endpoint é outro.
+
+Se o build for o Git **nativo da Cloudflare no Worker**, muitas vezes **não** precisa de token manual — remova `CLOUDFLARE_API_TOKEN` se estiver com escopo errado.
 
 ## CLI local
 
@@ -26,21 +46,17 @@ pnpm run deploy
 
 ## Headers e redirects
 
-`public/_headers` e `public/_redirects` vão para `dist/` no build. Para testar com o runtime da Cloudflare:
+`public/_headers` e `public/_redirects` vão para `dist/` e são aplicados pelo Wrangler:
 
 ```bash
 pnpm run build
 pnpm run preview:cf
 ```
 
-(`astro preview` não aplica `_headers`.)
-
 ## Domínio
 
 Canônico: **`https://typing.abjr.dev`** (`SITE_URL` / `SITE_HOST` em `src/constants/site.ts`).
 
-No dashboard, o domínio customizado deve ser **`typing.abjr.dev`** — **não** `typings.abjr.dev`.
-
-Redirecionar `typings.abjr.dev` → `typing.abjr.dev` use **Rules → Redirect Rules** (ou remova o hostname errado em **Domains & Routes**).
+Domínio customizado no Worker **`typing`**: **`typing.abjr.dev`** (não `typings.abjr.dev`).
 
 Após o deploy, envie `https://typing.abjr.dev/sitemap.xml` no Search Console.
