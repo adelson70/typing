@@ -112,6 +112,14 @@ const en = {
   'pwa.dismiss': 'Not now',
   'pwa.offline': 'You are offline. Practice still works.',
 
+  // Ads
+  'ads.adblock.title': 'Ad blocker detected',
+  'ads.adblock.body':
+    'Typing Studio is free because of ads. Please disable your ad blocker for this site so we can keep it that way.',
+  'ads.adblock.reassurance':
+    'Our ads are discreet and won\'t get in the way of your practice.',
+  'ads.adblock.refresh': 'After disabling, refresh this page',
+
   // Errors
   'error.notFound': 'Page not found',
   'error.notFoundBody': 'The page you are looking for does not exist or has moved.',
@@ -306,6 +314,14 @@ const ptBr: Record<TranslationKey, string> = {
   'pwa.installPrompt': 'Instale o Typing Studio para praticar offline',
   'pwa.dismiss': 'Agora não',
   'pwa.offline': 'Você está offline. A prática continua funcionando.',
+
+  // Anúncios
+  'ads.adblock.title': 'Bloqueador de anúncios detectado',
+  'ads.adblock.body':
+    'O Typing Studio é gratuito graças aos anúncios. Desative o bloqueador de anúncios neste site para que possamos continuar assim.',
+  'ads.adblock.reassurance':
+    'Nossos anúncios são discretos e não atrapalham a sua prática.',
+  'ads.adblock.refresh': 'Depois de desativar, atualize esta página',
 
   // Erros
   'error.notFound': 'Página não encontrada',

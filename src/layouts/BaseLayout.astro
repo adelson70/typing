@@ -13,6 +13,7 @@ import JsonLd from '@/components/seo/JsonLd.astro';
 import ThemeScript from '@/components/ThemeScript.astro';
 import ServiceWorker from '@/components/ServiceWorker.astro';
 import AdSenseLoader from '@/components/ads/AdSenseLoader.astro';
+import AdBlockGuard from '@/components/ads/AdBlockGuard.astro';
 import SiteHeader from '@/components/layout/SiteHeader.astro';
 import SiteFooter from '@/components/layout/SiteFooter.astro';
 
@@ -62,6 +63,7 @@ const globalSchemas: JsonLdDocument[] = [organizationSchema(), webSiteSchema(loc
     </main>
 
     <SiteFooter locale={locale} />
+    <AdBlockGuard />
     <ServiceWorker />
   </body>
 </html>

@@ -1,0 +1,88 @@
+---
+/**
+ * Full-screen overlay shown when an ad blocker is detected.
+ *
+ * Not dismissible — the visitor must disable their blocker and refresh. The bait
+ * element and detection logic mirror `detect-adblock.ts`; keep them in sync.
+ */
+import { ADSENSE_CLIENT_ID } from '@/constants/site';
+import { localeFromPath } from '@/constants/i18n';
+import { t } from '@/i18n/translations';
+
+const enabled = ADSENSE_CLIENT_ID.length > 0;
+const locale = localeFromPath(Astro.url.pathname);
+---
+
+{
+  enabled && (
+    <>
+      {/*
+        Off-screen bait targeted by common block lists. Ad blockers hide or
+        remove elements with these class names; a zero-height bait is the signal.
+      */}
+      <div
+        id="adblock-bait"
+        class="adsbox"
+        aria-hidden="true"
+        style="position:absolute;left:-9999px;width:1px;height:1px;"
+      />
+
+      <div
+        id="adblock-overlay"
+        data-testid="adblock-overlay"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-canvas/95 p-6 backdrop-blur-sm"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="adblock-title"
+        aria-describedby="adblock-body adblock-reassurance adblock-refresh"
+      >
+        <div class="mx-auto max-w-md text-center">
+          <h2 id="adblock-title" class="text-2xl font-semibold text-fg">
+            {t(locale, 'ads.adblock.title')}
+          </h2>
+          <p id="adblock-body" class="mt-3 text-sm text-fg-muted">
+            {t(locale, 'ads.adblock.body')}
+          </p>
+          <p id="adblock-reassurance" class="mt-3 text-sm text-fg-muted">
+            {t(locale, 'ads.adblock.reassurance')}
+          </p>
+          <p id="adblock-refresh" class="mt-6 text-sm font-medium text-fg">
+            {t(locale, 'ads.adblock.refresh')}
+          </p>
+        </div>
+      </div>
+
+      <script is:inline>
+        (function () {
+          var DELAY_MS = 2000;
+
+          function isAdBlockActive(bait, adsbygoogle) {
+            if (!bait || bait.offsetHeight === 0 || bait.offsetParent === null) return true;
+            if (typeof adsbygoogle === 'undefined') return true;
+            return false;
+          }
+
+          function run() {
+            var bait = document.getElementById('adblock-bait');
+            var overlay = document.getElementById('adblock-overlay');
+            if (!overlay) return;
+
+            if (isAdBlockActive(bait, window.adsbygoogle)) {
+              overlay.classList.remove('hidden');
+              overlay.classList.add('flex');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+              setTimeout(run, DELAY_MS);
+            });
+          } else {
+            setTimeout(run, DELAY_MS);
+          }
+        })();
+      </script>
+    </>
+  )
+}
